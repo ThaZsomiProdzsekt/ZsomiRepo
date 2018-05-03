@@ -2,6 +2,8 @@
 
 <overall description>
 
+## Linkek:
+
  - [Expectation maximization (EM)](https://en.wikipedia.org/wiki/Expectation_maximization)
  - [Naive Bayes classifier](https://en.wikipedia.org/wiki/Naive_Bayes_classifier)
  - [tf–idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf)
