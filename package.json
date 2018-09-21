@@ -1,0 +1,31 @@
+{
+  "name": "convapi",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node ./lib/server.ts",
+    "start": "nodemon ./dist/server.js",
+    "prod": "npm run build && npm run start"
+  },
+  "dependencies": {
+    "@types/bcrypt": "^2.0.0",
+    "@types/bcrypt-nodejs": "0.0.30",
+    "@types/express": "^4.16.0",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "^4.16.3",
+    "http-errors": "~1.6.2",
+    "mongodb": "^3.1.4",
+    "mongoose": "^5.2.14",
+    "morgan": "~1.9.0",
+    "nohm": "^2.2.0",
+    "pug": "2.0.0-beta11",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/mongodb": "^3.1.7",
+    "@types/mongoose": "^5.2.12"
+  }
+}

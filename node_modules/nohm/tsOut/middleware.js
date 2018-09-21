@@ -1,0 +1,232 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Debug = require("debug");
+const fs = require("fs");
+const _1 = require(".");
+const validators_1 = require("./validators");
+const debug = Debug('nohm:middleware');
+const MAX_DEPTH = 5;
+function customToString(obj, depth = 0) {
+    if (depth > MAX_DEPTH) {
+        console.warn(new Error('nohm: middleware customToString() maxdepth exceeded').stack);
+        return '';
+    }
+    switch (typeof obj) {
+        case 'string':
+            return '"' + obj + '"';
+        case 'number':
+            return obj.toString();
+        case 'boolean':
+            return obj ? 'true' : 'false';
+        case 'function':
+            if (obj instanceof RegExp) {
+                return obj.toString();
+            }
+            break;
+        case 'object':
+            if (Array.isArray(obj)) {
+                const arr = [];
+                obj.forEach((val) => {
+                    arr.push(customToString(val, depth + 1));
+                });
+                return '[' + arr.join(',') + ']';
+            }
+            else if (obj instanceof RegExp) {
+                return obj.toString();
+            }
+            else {
+                const arr = [];
+                Object.keys(obj).forEach((val) => {
+                    arr.push('"' + val + '":' + customToString(obj[val], depth + 1));
+                });
+                return '{' + arr.join(',') + '}';
+            }
+        default:
+            return '';
+    }
+    return '';
+}
+function validationsFlatten(model, exclusions = {}) {
+    const instance = new model();
+    const definitions = instance.getDefinitions();
+    let str = instance.modelName + ': {';
+    /*
+     * example exclusions object
+     *  {
+     *    // this will ignore the first validation in the validation definition array for name in the model definition
+     *    name: [0],
+     *    // this will completely ignore all validations for the salt property
+     *    salt: true
+     *  },
+     */
+    const exclusionsStrings = [];
+    const exclusionsObject = {};
+    Object.keys(exclusions).forEach((key) => {
+        const value = exclusions[key];
+        if (Array.isArray(value)) {
+            exclusionsObject[key] = value.map((x) => !!x);
+        }
+        exclusionsStrings.push(key);
+    });
+    Object.keys(definitions).forEach((key) => {
+        const isExcepted = exclusionsStrings.indexOf(key) !== -1 &&
+            !exclusionsObject.hasOwnProperty(key);
+        if (!isExcepted) {
+            const vals = definitions[key].validations;
+            if (Array.isArray(vals) && vals.length > 0) {
+                str += `${key}: [`;
+                const strVals = [];
+                vals.forEach((val, index) => {
+                    if (!exclusionsObject[key] || exclusionsObject[key][index]) {
+                        strVals.push(customToString(val));
+                    }
+                });
+                str += strVals.join(',') + '],           ';
+            }
+        }
+    });
+    return str + '}';
+}
+let extraFilesIndex = 0;
+function wrapFile(fileStr, namespace) {
+    let str = `${namespace}.extraValidations[${extraFilesIndex}]={};(function (exports) {`;
+    str += fileStr;
+    str += `})(${namespace}.extraValidations[${extraFilesIndex}]);`;
+    extraFilesIndex++;
+    return str;
+}
+function wrapExtraFiles(files, namespace) {
+    let str = '';
+    files.forEach((path) => {
+        const fileStr = fs.readFileSync(path, 'utf-8');
+        str += wrapFile(fileStr, namespace);
+    });
+    return str;
+}
+/**
+ * Returns a middleware that can deliver the validations as a javascript file
+ * and the modelspecific validations as a JSON object to the browser.
+ * This is useful if you want to save some bandwith by doing the validations
+ * in the browser before saving to the server.
+ *
+ * Example:
+ *
+ * ```
+ *    server.use(nohm.middleware(
+ *      // options object
+ *      {
+ *        url: '/nohm.js',
+ *        namespace: 'nohm',
+ *        exclusions: {
+ *
+ *          User: { // modelName
+ *
+ *            // this will ignore the second validation in the validation definition array for
+ *            // the property 'name' in the model definition
+ *            name: [false, true],
+ *
+ *            // this will completely ignore all validations for the salt property
+ *            salt: true
+ *          },
+ *
+ *          Privileges: true // this will completely ignore the Priviledges model
+ *        }
+ *      }
+ *    ));
+ * ```
+ *
+ * @see https://maritz.github.io/nohm/#browser-validation
+ * @param {Object} options Options for the middleware
+ * @param {string} [options.url='/nomValidations.js'] Url under which the js file will be available.
+ * @param {object.<string, object | boolean>} [options.exclusions={}] Object containing exclusions for the
+ * validations export - see example for details
+ * @param {string} [options.namespace='nomValidations'] Namespace to be used by the js file in the browser.
+ * @param {string} [options.extraFiles=[]] Extra files containing validations.
+ * You should only use this if they are not already set via Nohm.setExtraValidations
+ * as this automatically includes those.
+ * @param {number} [options.maxAge=3600] Cache control in seconds. (Default is one hour)
+ * @param {boolean} [options.uglify=false] True to enable minification.
+ * Requires uglify-js to be installed in your project!
+ * @return {Middleware~callback}
+ * @instance
+ * @memberof NohmClass
+ */
+function middleware(options, nohm = _1.nohm) {
+    options = options || {};
+    const url = options.url || '/nohmValidations.js';
+    const namespace = options.namespace || 'nohmValidations';
+    const maxAge = options.maxAge || 3600; // 1 hour
+    const exclusions = options.exclusions || {};
+    let extraFiles = options.extraFiles || [];
+    let uglify = options.uglify || false;
+    if (!Array.isArray(extraFiles)) {
+        extraFiles = [extraFiles];
+    }
+    // collect models
+    const collectedModels = [];
+    const models = nohm.getModels();
+    Object.keys(models).forEach((name) => {
+        const model = models[name];
+        let exclusion = exclusions[name];
+        if (exclusion === true) {
+            return; // exception set, but no fields
+        }
+        else {
+            if (exclusion === true || exclusion === false) {
+                exclusion = {};
+            }
+            collectedModels.push(validationsFlatten(model, exclusion));
+        }
+    });
+    let str = `var nohmValidationsNamespaceName = "${namespace}";
+  var ${namespace}={"extraValidations": [], "models":{${collectedModels.join(',')}}};
+  // extrafiles
+  ${wrapExtraFiles(extraFiles, namespace)}
+  // extravalidations
+  ${wrapExtraFiles(nohm.getExtraValidatorFileNames(), namespace) /* needs to somehow access the same thing */}
+  // validators.js
+  ${fs.readFileSync(validators_1.universalValidatorPath, 'utf-8')}`;
+    if (uglify) {
+        try {
+            // tslint:disable-next-line:no-implicit-dependencies
+            uglify = require('uglify-js');
+        }
+        catch (e) {
+            console.warn('You tried to use the uglify option in Nohm.connect but uglify-js is not requirable.', 'Continuing without uglify.', e);
+        }
+        if (uglify.parser && uglify.uglify) {
+            const jsp = uglify.parser;
+            const pro = uglify.uglify;
+            const ast = jsp.parse(str);
+            // ast = pro.ast_mangle(ast); // TODO: test if this works with our globals
+            const squeezed = pro.ast_squeeze(ast);
+            str = pro.gen_code(squeezed);
+        }
+    }
+    debug(`Setting up middleware to be served on '%s' with namespace '%s' and collected these models: %o`, url, namespace, collectedModels);
+    /**
+     * This function is what is returned by {@link NohmClass#middleware}.
+     *
+     * @callback Middleware~callback
+     * @name MiddlewareCallback
+     * @function
+     * @param {Object} req http IncomingMessage
+     * @param {Object} res http ServerResponse
+     * @param {function} [next] Optional next function for express/koa
+     * @memberof Nohm
+     */
+    return (req, res, next) => {
+        if (req.url === url) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/javascript');
+            res.setHeader('Content-Length', str.length.toString());
+            res.setHeader('Cache-Control', 'public, max-age=' + maxAge);
+            res.end(str);
+        }
+        else if (next && typeof next === 'function') {
+            next();
+        }
+    };
+}
+exports.middleware = middleware;
+//# sourceMappingURL=middleware.js.map
