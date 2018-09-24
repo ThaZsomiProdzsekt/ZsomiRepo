@@ -10,7 +10,7 @@ interface IDoscount extends mongoose.Document {
     meals: [IMeal];
     currentlyAlive: Boolean;
     drinks: [IDrink];
-    startsAt: Date;
+    startsAt: Date;s
     endsAt: Date;
     discountedAmountsLeft: Number;
     discountedPrice: Number;

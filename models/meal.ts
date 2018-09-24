@@ -11,8 +11,14 @@ export interface IPortion extends mongoose.Document {
 };
 
 const PortionSchema = new Schema({
-    portionName: String,
-    portionPrice: Number,
+    portionName: {
+        type: String,
+        required: true
+    },
+    portionPrice: {
+        type: Number,
+        required: true
+    },
     portionCalories: {
         type: Number,
         required: false
@@ -37,8 +43,15 @@ export interface IMeal extends mongoose.Document {
     name: String;
     alternativeNames: String[];
     cost: Number;
-    availablePortions: IPortion[];
-    ingredients: Map<String, String>;
+    availablePortions: [{
+        portionName: String;
+        portionPrice: Number;
+        portionCalories: Number;
+        portionCarbs: Number;
+        portionProtein: Number;
+        portionFats: Number;
+    }];
+    ingredients: String;
     CurrentlyAvailable: Boolean;
     vegan: Boolean;
     vegetarian: Boolean;
@@ -46,7 +59,7 @@ export interface IMeal extends mongoose.Document {
     containsGluten: Boolean;
     kosher: Boolean;
     halal: Boolean;
-    containsAllergen: Map<String, String>;
+    containsAllergen: String;
     containsSaturatedFat: Boolean;
     calories: Number;
     carbs: Number;
@@ -70,13 +83,38 @@ export const MealSchema = new Schema({
         required: true
     },
     availablePortions: {
-        type: [Portion],
+        type: [{
+            portionName: {
+                type: String,
+                required: true
+            },
+            portionPrice: {
+                type: Number,
+                required: true
+            },
+            portionCalories: {
+                type: Number,
+                required: false
+            },
+            portionCarbs: {
+                type: Number,
+                required: false,
+            },
+            portionProtein: {
+                type: Number,
+                required: false
+            },
+            portionFats: {
+                type: Number,
+                required: false,
+            }
+        }],
         required: true
     },
     ingredients: {
-        type: Map,
-        of: String,
-        required: true
+        type: String,
+        required: false,
+        default: ''
     },
     CurrentlyAvailable: {
         type: Boolean,
@@ -114,8 +152,7 @@ export const MealSchema = new Schema({
         default: false
     },
     containsAllergen: {
-        type: Map,
-        of: String,
+        type: String,
         required: false,
         default: ''
     },

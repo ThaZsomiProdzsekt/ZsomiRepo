@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import {IMeal, MealSchema} from "./meal";
 
 const Schema = mongoose.Schema;
 
@@ -18,7 +19,7 @@ export interface IDrink extends mongoose.Document {
     everythingElse: String;
 }
 
-export const Drink = new Schema({
+export const DrinkSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -81,3 +82,5 @@ export const Drink = new Schema({
         default: ''
     }
 });
+
+export const Drink = mongoose.model<IDrink>('Drink', DrinkSchema);

@@ -8,7 +8,7 @@ const Order = mongoose.model<IOrder>('Order', OrderSchema);
 
 export interface ICourier extends mongoose.Document {
     onItsWay: Boolean;
-    currentlyHandling: Order;
+   // currentlyHandling: Order;
 
 }
 

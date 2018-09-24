@@ -1,13 +1,16 @@
 import * as mongoose from 'mongoose';
-import { IMeal, Meal } from "./meal";
+import { IMeal, Meal, MealSchema } from "./meal";
+import { IDrink, Drink, DrinkSchema } from "./drink";
+import { IDrink, Drink, DrinkSchema } from "./discount";
 // import { Meal } from "./meal";
 
 const Schema = mongoose.Schema;
 
-interface IOrder extends mongoose.Document {
+export interface IOrder extends mongoose.Document {
     orderDate: Date;
-    order: [Meal];
-
+    orderMeal: IMeal[];
+    orderDrink: IDrink[];
+    created_date: Date;
 }
 
 export const OrderSchema = new Schema({
@@ -15,8 +18,18 @@ export const OrderSchema = new Schema({
         type: Date,
         required: true
     },
-    order: {
-        type: [Meal],
-        required: true
+    orderMeal: {
+        type: [MealSchema],
+        required: false
     },
+    orderDrink: {
+        type: [DrinkSchema],
+        required: false
+    },
+    created_date: {
+        type: Date,
+        default: Date.now
+    }
 });
+
+export const TableBooking = mongoose.model<ITableBooking>('TableBooking', TableBookingSchema);
