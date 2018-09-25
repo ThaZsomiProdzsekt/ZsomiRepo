@@ -12,6 +12,7 @@ var hoursSchema = new Schema({
         required: true
     }
 });
+exports.Hours = mongoose.model('Hours', hoursSchema);
 var openHoursSchema = new Schema({
     defaultOrderHoursPerDay: {
         // Map should be filled with days and the respective opening hours. This ONLY contains the default opening hours.
@@ -25,7 +26,7 @@ var openHoursSchema = new Schema({
         required: true
     }
 });
-var openHoursHoliday = new Schema({
+var openHoursHolidaySchema = new Schema({
     holidayDate: {
         type: Date,
         required: true
@@ -35,6 +36,7 @@ var openHoursHoliday = new Schema({
         required: true
     }
 });
+exports.OpenHoursHoliday = mongoose.model('OpenHoursHoliday', openHoursHolidaySchema);
 exports.RestaurantSchema = new Schema({
     restName: {
         type: String,
@@ -65,17 +67,44 @@ exports.RestaurantSchema = new Schema({
         required: false,
         default: true
     },
+    defaultHoursPerDay: {
+        // Map should be filled with days and the respective opening hours. This ONLY contains the default opening hours.
+        /*monday: { type: [{
+                type: [
+                    { openHour: Date },
+                    { closingHour: Date }
+                ],
+                day: String
+            }],
+            required: true },*/
+        monday: { openHours: [hoursSchema], required: true },
+        tuesday: { openHours: [hoursSchema], required: true },
+        wednesday: { openHours: [hoursSchema], required: true },
+        thursday: { openHours: [hoursSchema], required: true },
+        friday: { openHours: [hoursSchema], required: true },
+        saturday: { openHours: [hoursSchema], required: true },
+        sunday: { openHours: [hoursSchema], required: true },
+        required: true
+    },
+    /*
     openingHoursNormal: {
         type: openHoursSchema,
         required: true
     },
+    */
     openHoursOnHolidays: {
-        type: [openHoursHoliday],
+        type: [openHoursHolidaySchema],
         required: false
+    },
+    belongsTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
     created_date: {
         type: Date,
         default: Date.now
     }
 });
+exports.Restaurant = mongoose.model('Restaurant', exports.RestaurantSchema);
 //# sourceMappingURL=restaurant.js.map

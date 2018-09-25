@@ -1,24 +1,26 @@
 import * as mongoose from 'mongoose';
 import { IMeal, Meal } from "./meal";
-import { IDrink, Drink } from "./drink";
+import {IDrink, Drink, DrinkSchema} from "./drink";
 // import { Meal } from "./meal";
 
 const Schema = mongoose.Schema;
 
 // Itten most a faszom se tudja, hogy konkrétan mégis mi a faszról van szó...
-interface IDoscount extends mongoose.Document {
-    meals: [IMeal];
+export interface IDiscount extends mongoose.Document {
+    meals: [];
     currentlyAlive: Boolean;
-    drinks: [IDrink];
-    startsAt: Date;s
+    drinks: [];
+    startsAt: Date;
     endsAt: Date;
     discountedAmountsLeft: Number;
     discountedPrice: Number;
+    created_date: Date;
 }
 
 export const DiscountSchema = new Schema({
     meals: {
-        type: [Meal],
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Meal',
         required: false
     },
     currentlyAlive: {
@@ -27,7 +29,8 @@ export const DiscountSchema = new Schema({
         default: false
     },
     drinks: {
-        type: [Drink],
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Drink',
         required: false
     },
     startsAt: {
@@ -41,5 +44,15 @@ export const DiscountSchema = new Schema({
     discountedAmountsLeft: {
         type: Number,
         required: false
+    },
+    discountedPrice: {
+        type: Number,
+        required: true
+    },
+    created_date: {
+        type: Date,
+        default: Date.now
     }
 });
+
+export const Discount = mongoose.model<IDiscount>('Discount', DiscountSchema);

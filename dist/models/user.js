@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-exports.UserSchema = new Schema({
+const UserSchema = new Schema({
     userName: {
         type: String,
         required: true
@@ -31,4 +31,5 @@ exports.UserSchema = new Schema({
         default: Date.now
     }
 });
+exports.User = mongoose.model('User', UserSchema);
 //# sourceMappingURL=user.js.map

@@ -67,7 +67,7 @@ export interface IMeal extends mongoose.Document {
     protein: Number;
     originOfIngredients: Map<String, String>;
     everythingElse: String;
-};
+}
 
 export const MealSchema = new Schema({
     name: {

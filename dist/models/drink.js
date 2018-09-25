@@ -2,10 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-exports.Drink = new Schema({
+exports.DrinkSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: false
+    },
+    price: {
+        type: Number,
+        required: false,
+        default: 0
     },
     size: {
         type: String,
@@ -63,6 +68,25 @@ exports.Drink = new Schema({
         type: String,
         required: false,
         default: ''
+    },
+    created_date: {
+        type: Date,
+        default: Date.now
     }
 });
+exports.Drink = mongoose.model('Drink', exports.DrinkSchema);
+function addNewDrink(drinksDTO, callback) {
+    let drink = new exports.Drink();
+    drink.name = drinksDTO.name;
+    drink.price = drinksDTO.price;
+    drink.size = drinksDTO.size;
+    drink.liter = drinksDTO.liter;
+    drink.save((err, product) => {
+        if (err) {
+            console.log('Error at adding new Drink: ' + err);
+            callback(err);
+        }
+    });
+}
+exports.addNewDrink = addNewDrink;
 //# sourceMappingURL=drink.js.map

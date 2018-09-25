@@ -1,11 +1,22 @@
+import * as mongoose from 'mongoose';
+import { DBConfig } from '../config/database';
+import * as https from 'https';
 import app from "./app";
 const PORT = 3000;
 
-function lofasz(dummy: string) {
-    console.log('dummy: ' + dummy);
+const server = https.createServer(app);
+
+const server = app.listen(PORT, () => {
+    console.log('Express server listening on port ' + PORT);
+    DBConfig.connectMongoDB();
+});
+
+
+/*
+const httpsOptions = {
 }
 
-app.listen(PORT, () => {
-    console.log('Express server listening on port ' + PORT);
-    lofasz("asdasd");
+https.createServer(httpsOptions, app).listen(PORT, () => {
+   console.log('Express server listening on port: ' + PORT)
 });
+*/

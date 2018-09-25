@@ -4,8 +4,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 ;
 const PortionSchema = new Schema({
-    portionName: String,
-    portionPrice: Number,
+    portionName: {
+        type: String,
+        required: true
+    },
+    portionPrice: {
+        type: Number,
+        required: true
+    },
     portionCalories: {
         type: Number,
         required: false
@@ -24,7 +30,6 @@ const PortionSchema = new Schema({
     }
 });
 const Portion = mongoose.model('Portion', PortionSchema);
-;
 exports.MealSchema = new Schema({
     name: {
         type: String,
@@ -39,13 +44,38 @@ exports.MealSchema = new Schema({
         required: true
     },
     availablePortions: {
-        type: [Portion],
+        type: [{
+                portionName: {
+                    type: String,
+                    required: true
+                },
+                portionPrice: {
+                    type: Number,
+                    required: true
+                },
+                portionCalories: {
+                    type: Number,
+                    required: false
+                },
+                portionCarbs: {
+                    type: Number,
+                    required: false,
+                },
+                portionProtein: {
+                    type: Number,
+                    required: false
+                },
+                portionFats: {
+                    type: Number,
+                    required: false,
+                }
+            }],
         required: true
     },
     ingredients: {
-        type: Map,
-        of: String,
-        required: true
+        type: String,
+        required: false,
+        default: ''
     },
     CurrentlyAvailable: {
         type: Boolean,
@@ -83,8 +113,7 @@ exports.MealSchema = new Schema({
         default: false
     },
     containsAllergen: {
-        type: Map,
-        of: String,
+        type: String,
         required: false,
         default: ''
     },

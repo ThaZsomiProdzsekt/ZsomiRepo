@@ -1,13 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
-const meal_1 = require("./meal");
-const drink_1 = require("./drink");
 // import { Meal } from "./meal";
 const Schema = mongoose.Schema;
 exports.DiscountSchema = new Schema({
     meals: {
-        type: [meal_1.Meal],
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Meal',
         required: false
     },
     currentlyAlive: {
@@ -16,7 +15,8 @@ exports.DiscountSchema = new Schema({
         default: false
     },
     drinks: {
-        type: [drink_1.Drink],
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Drink',
         required: false
     },
     startsAt: {
@@ -30,6 +30,15 @@ exports.DiscountSchema = new Schema({
     discountedAmountsLeft: {
         type: Number,
         required: false
+    },
+    discountedPrice: {
+        type: Number,
+        required: true
+    },
+    created_date: {
+        type: Date,
+        default: Date.now
     }
 });
+exports.Discount = mongoose.model('Discount', exports.DiscountSchema);
 //# sourceMappingURL=discount.js.map
