@@ -12,7 +12,6 @@ export class DBConfig {
         connect('mongodb://localhost:27017/ConvAPI', (err) => {
             if (err) console.log("Faied to connect to DB: " + err);
             console.log("Successfully connected to MongoDB");
-            console.log('Bazd meg anyád!')
         });
     }
 }

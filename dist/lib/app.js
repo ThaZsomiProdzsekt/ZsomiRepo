@@ -2,17 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bodyParser = require("body-parser");
-const drinks_1 = require("../routes/drinks");
+const drinksRoutes_1 = require("../routes/drinksRoutes");
 const database_1 = require("../config/database");
+const tableBookingRoutes_1 = require("../routes/tableBookingRoutes");
 class App {
     constructor() {
-        this.routePrv = new drinks_1.Routes();
+        this.routePrv = new drinksRoutes_1.DrinksRoutes();
+        this.routeLfsz = new tableBookingRoutes_1.TableBookingRoutes();
+        this.mongoSetup();
         this.app = express();
         this.config();
-        this.routePrv.routes(this.app);
-        this.mongoSetup();
-        //this.connectToDatabase();
+        this.routePrv.drinksRoutes(this.app);
+        this.routeLfsz.tableBookingRoutes(this.app);
     }
+    /*
+        private routes(app: any): void {
+            let router = app.Router();
+    
+            router.get('/', (req, res, next) => {
+                res.json({
+                    message: 'FFS'
+                });
+            });
+            this.app.use('/', router);
+        }
+    */
     mongoSetup() {
         database_1.DBConfig.connectMongoDB();
     }

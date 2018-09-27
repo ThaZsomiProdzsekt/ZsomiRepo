@@ -10,7 +10,10 @@
   },
   "include": [
     "lib/**/*.ts",
-    "models/**/*.ts"
+    "models/**/*.ts",
+    "routes/**/.ts",
+    "DTOs/**/.ts",
+    "config/**/.ts"
   ],
   "exclude": [
     "node_modules"

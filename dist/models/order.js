@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 exports.OrderSchema = new Schema({
     orderDate: {
         type: Date,
-        required: true
+        required: false
     },
     orderMeal: {
         type: [mongoose.Schema.Types.ObjectId],

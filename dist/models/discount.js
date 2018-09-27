@@ -33,7 +33,7 @@ exports.DiscountSchema = new Schema({
     },
     discountedPrice: {
         type: Number,
-        required: true
+        required: false
     },
     created_date: {
         type: Date,

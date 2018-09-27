@@ -20,4 +20,5 @@ export class drinksDTO {
         this.liter = liter;
         this.price = price;
     }
+    
 }

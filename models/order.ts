@@ -25,7 +25,7 @@ export interface IOrder extends mongoose.Document {
 export const OrderSchema = new Schema({
     orderDate: {
         type: Date,
-        required: true
+        required: false
     },
     orderMeal: {
         type: [mongoose.Schema.Types.ObjectId],

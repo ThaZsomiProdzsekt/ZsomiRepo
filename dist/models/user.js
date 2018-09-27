@@ -5,26 +5,33 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
     userName: {
         type: String,
-        required: true
+        required: false,
+        default: 'newUser'
     },
     firstName: {
         type: String,
-        required: true
+        required: false,
+        default: 'Doe'
     },
     lastName: {
         type: String,
-        required: true
+        required: false,
+        default: 'John'
     },
     email: {
         type: String,
-        required: true
+        required: false,
+        default: 'asd@asd.asd'
     },
     phone: {
-        type: Number
+        type: Number,
+        required: false,
+        default: 0
     },
     additionalInformation: {
         type: String,
-        required: false
+        required: false,
+        default: ''
     },
     created_date: {
         type: Date,
@@ -32,4 +39,19 @@ const UserSchema = new Schema({
     }
 });
 exports.User = mongoose.model('User', UserSchema);
+function addNewUser(userDto, callback) {
+    let user = new exports.User();
+    user.userName = userDto.userName;
+    user.firstName = userDto.firstName;
+    user.lastName = userDto.lastName;
+    user.email = userDto.email;
+    user.phone = userDto.phone;
+    user.save((err, product) => {
+        if (err) {
+            console.log('Error at adding new User: ' + err);
+            callback(err);
+        }
+    });
+}
+exports.addNewUser = addNewUser;
 //# sourceMappingURL=user.js.map

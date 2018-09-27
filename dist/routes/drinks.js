@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Routes {
+class DrinksRoute {
     routes(app) {
         // DEFAULT CUCC
         let router = app.Router();
+        app.use('/', router);
         router.get('/', (req, res, next) => {
             res.json({
                 message: 'MUSTACHE'
             });
         });
-        app.use('/', router);
         /*
         app.route('/').get((req: Request, res: Response) => {
             res.status(200).send({
@@ -28,7 +28,7 @@ class Routes {
         */
     }
 }
-exports.Routes = Routes;
+exports.DrinksRoute = DrinksRoute;
 /*
 Router.post('/newDrink', (req: Request, res: Response) => {
     var drink = new drinksDTO('kamudrink1', 'kicsi', 0.3, 30);

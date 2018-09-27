@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import { IOrder, OrderSchema, Order } from "./order";
+import { ConsumersDTO } from "../DTOs/consumersDTO";
 
 const Schema = mongoose.Schema;
 
@@ -27,7 +28,8 @@ export const ConsumerSchema = new Schema({
         required: false,
     },
     orders: {
-        type: [Order],
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Order',
         required: false,
     },
     otherInformation: {
@@ -47,4 +49,19 @@ export const ConsumerSchema = new Schema({
 });
 
 export var Consumer = mongoose.model<IConsumer>('Consumer', ConsumerSchema);
+
+export function addNewConsumer(cons: ConsumersDTO, callback: Function) {
+    let consumer = new Consumer();
+    consumer.name = cons.name;
+    consumer.save( function (err, product) {
+        if (err) {
+            console.log('Error at addNewConsumer function (MODEL): ' + err);
+            callback(err);
+        }
+        if (product){
+            console.log('Product created at addNewConsumer function (MODEL): ' + product);
+        }
+        callback(consumer);
+    });
+}
 

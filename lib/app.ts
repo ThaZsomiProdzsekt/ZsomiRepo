@@ -1,22 +1,35 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as redis from 'redis';
-import { Routes } from "../routes/drinks";
+import { DrinksRoutes } from "../routes/drinksRoutes";
 import * as mongoose from "mongoose";
-import {DBConfig} from "../config/database";
+import { DBConfig } from "../config/database";
+import {TableBookingRoutes} from "../routes/tableBookingRoutes";
 
 class App {
     public app: express.Application;
-    public routePrv: Routes = new Routes();
+    public routePrv: DrinksRoutes = new DrinksRoutes();
+    public routeLfsz: TableBookingRoutes = new TableBookingRoutes();
 
     constructor() {
+        this.mongoSetup();
         this.app = express();
         this.config();
-        this.routePrv.routes(this.app);
-        this.mongoSetup();
-        //this.connectToDatabase();
+        this.routePrv.drinksRoutes(this.app);
+        this.routeLfsz.tableBookingRoutes(this.app);
     }
+/*
+    private routes(app: any): void {
+        let router = app.Router();
 
+        router.get('/', (req, res, next) => {
+            res.json({
+                message: 'FFS'
+            });
+        });
+        this.app.use('/', router);
+    }
+*/
     private mongoSetup() {
         DBConfig.connectMongoDB();
     }

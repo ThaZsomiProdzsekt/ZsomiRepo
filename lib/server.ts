@@ -1,16 +1,33 @@
 import * as mongoose from 'mongoose';
 import { DBConfig } from '../config/database';
-import * as https from 'https';
+// import * as http from 'http';
 import app from "./app";
 const PORT = 3000;
 
-const server = https.createServer(app);
+app.listen(PORT, () => {
+    console.log('Express server listening on port: ISTENEM MÁR ' + PORT);
+});
 
+//const server = http.createServer(app);
+
+/*
 const server = app.listen(PORT, () => {
     console.log('Express server listening on port ' + PORT);
     DBConfig.connectMongoDB();
 });
+*/
 
+/*
+server.listen(PORT);
+server.on('listening', () => {
+    console.log('Express server listening on port ' + PORT);
+    DBConfig.connectMongoDB();
+});
+
+server.on('error', (err) => {
+    console.log('Express server ERROR ' + err);
+});
+*/
 
 /*
 const httpsOptions = {

@@ -1,34 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
-const consumer_1 = require("./consumer");
 //import {IMeal, MealSchema} from "./meal";
 const Schema = mongoose.Schema;
-var ReservationSchema = new Schema({
-    reservedFrom: {
-        type: [Date],
-        required: true
-    },
-    reservedTo: {
-        type: Date,
-        required: true
-    }
-});
-var TableSchema = new Schema({
-    tableID: String,
-    numberOfChairs: Number,
-    reserved: Boolean,
-    location: String,
-    inDoors: Boolean,
-    reservedDuring: [ReservationSchema],
-    reservationTimes: [
-        {
-            reservedFrom: Date,
-            reservedTo: Date,
-            reservedFor: consumer_1.Consumer
-        }
-    ]
-});
 exports.TableBookingSchema = new Schema({
     numberOfTables: {
         type: Number,
@@ -38,12 +12,6 @@ exports.TableBookingSchema = new Schema({
         type: Number,
         required: false
     },
-    /*
-    tables: {
-        type: [TableSchema],
-        required: true
-    },
-    */
     tables: {
         type: [
             { tableID: String },
@@ -57,7 +25,11 @@ exports.TableBookingSchema = new Schema({
                 reservedDuring: [
                     { reservedFrom: Date },
                     { reservedTo: Date },
-                    { reservedFor: consumer_1.Consumer }
+                    { reservedFor: {
+                            type: mongoose.Schema.Types.ObjectId,
+                            ref: 'Consumer'
+                        }
+                    }
                 ]
             }
         ]
@@ -69,7 +41,7 @@ exports.TableBookingSchema = new Schema({
     belongsTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Restaurant',
-        required: true
+        required: false
     },
     created_date: {
         type: Date,
@@ -77,16 +49,6 @@ exports.TableBookingSchema = new Schema({
     }
 });
 exports.TableBooking = mongoose.model('TableBooking', exports.TableBookingSchema);
-exports.TableBookingSchema.methods.changeTableReservationSCH(function (tableId, resFrom, cust, resTo) {
-    exports.TableBooking.findOneAndUpdate({ 'tables.tableID': tableId }, {
-        '$set': { 'tables.$.reservationTimes.reservedFrom': resFrom,
-            'tables.$.reservationTimes.reservedTo': resTo,
-            'tables.$.reservationTimes.reservedFor': cust, }
-    }, function (err, doc) {
-        if (err)
-            console.log('Error at changeTableReservation: ' + err);
-    });
-});
 function changeTableReservation(tableId, resFrom, cust, resTo) {
     exports.TableBooking.findOneAndUpdate({ 'tables.tableID': tableId }, {
         '$set': { 'tables.$.reservationTimes.reservedFrom': resFrom,
@@ -153,7 +115,7 @@ function deleteExpiredTableReservations() {
     });
 }
 exports.deleteExpiredTableReservations = deleteExpiredTableReservations;
-function createNewTableBooking(belTo, theTables, numOfTables, numOfChairs, genAvail) {
+function createNewTableBooking(belTo, theTables, numOfTables, numOfChairs, genAvail, callback) {
     // construct the cucc MIKASAKADA, OH TO HELL WITH IT: SPECIAL BEAM CANNON!
     let tableBooking = new exports.TableBooking();
     tableBooking.numberOfTables = numOfTables;
@@ -165,9 +127,13 @@ function createNewTableBooking(belTo, theTables, numOfTables, numOfChairs, genAv
         location: theTables.location, inDoors: theTables.inDoors, reservedDuring: theTables.reservations
     };
     tableBooking.tables.push(rsrvationArr);
-    tableBooking.save((err, product) => {
+    tableBooking.save(function (err, product) {
         if (err)
-            console.log('Hiba az új asztalséma mentésénél: ' + err);
+            console.log('Error at creating new createNewTableBooking (MODEL) Error: ' + err);
+        if (err && callback)
+            callback(err);
+        if (product && callback)
+            callback(product);
     });
 }
 exports.createNewTableBooking = createNewTableBooking;

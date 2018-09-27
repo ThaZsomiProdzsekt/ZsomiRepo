@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
-const order_1 = require("./order");
 const Schema = mongoose.Schema;
 exports.ConsumerSchema = new Schema({
     name: {
@@ -17,7 +16,8 @@ exports.ConsumerSchema = new Schema({
         required: false,
     },
     orders: {
-        type: [order_1.Order],
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Order',
         required: false,
     },
     otherInformation: {
@@ -36,4 +36,19 @@ exports.ConsumerSchema = new Schema({
     }
 });
 exports.Consumer = mongoose.model('Consumer', exports.ConsumerSchema);
+function addNewConsumer(cons, callback) {
+    let consumer = new exports.Consumer();
+    consumer.name = cons.name;
+    consumer.save(function (err, product) {
+        if (err) {
+            console.log('Error at addNewConsumer function (MODEL): ' + err);
+            callback(err);
+        }
+        if (product) {
+            console.log('Product created at addNewConsumer function (MODEL): ' + product);
+        }
+        callback(consumer);
+    });
+}
+exports.addNewConsumer = addNewConsumer;
 //# sourceMappingURL=consumer.js.map

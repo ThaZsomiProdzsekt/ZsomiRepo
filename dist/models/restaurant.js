@@ -5,58 +5,45 @@ const Schema = mongoose.Schema;
 var hoursSchema = new Schema({
     open: {
         type: Date,
-        required: true
+        required: false
     },
     close: {
         type: Date,
-        required: true
+        required: false
     }
 });
 exports.Hours = mongoose.model('Hours', hoursSchema);
-var openHoursSchema = new Schema({
-    defaultOrderHoursPerDay: {
-        // Map should be filled with days and the respective opening hours. This ONLY contains the default opening hours.
-        monday: { openHours: [hoursSchema], required: true },
-        tuesday: { openHours: [hoursSchema], required: true },
-        wednesday: { openHours: [hoursSchema], required: true },
-        thursday: { openHours: [hoursSchema], required: true },
-        friday: { openHours: [hoursSchema], required: true },
-        saturday: { openHours: [hoursSchema], required: true },
-        sunday: { openHours: [hoursSchema], required: true },
-        required: true
-    }
-});
 var openHoursHolidaySchema = new Schema({
     holidayDate: {
         type: Date,
-        required: true
+        required: false
     },
     openHours: {
         type: [hoursSchema],
-        required: true
+        required: false
     }
 });
 exports.OpenHoursHoliday = mongoose.model('OpenHoursHoliday', openHoursHolidaySchema);
 exports.RestaurantSchema = new Schema({
     restName: {
         type: String,
-        required: true
+        required: false
     },
     restLoc: {
         type: String,
-        required: true
+        required: false
     },
     restPhone: {
         type: [Number],
-        required: true
+        required: false
     },
     restEmail: {
         type: String,
-        required: true
+        required: false
     },
     restSite: {
         type: String,
-        required: true
+        required: false
     },
     additionalInformation: {
         type: String,
@@ -69,22 +56,14 @@ exports.RestaurantSchema = new Schema({
     },
     defaultHoursPerDay: {
         // Map should be filled with days and the respective opening hours. This ONLY contains the default opening hours.
-        /*monday: { type: [{
-                type: [
-                    { openHour: Date },
-                    { closingHour: Date }
-                ],
-                day: String
-            }],
-            required: true },*/
-        monday: { openHours: [hoursSchema], required: true },
-        tuesday: { openHours: [hoursSchema], required: true },
-        wednesday: { openHours: [hoursSchema], required: true },
-        thursday: { openHours: [hoursSchema], required: true },
-        friday: { openHours: [hoursSchema], required: true },
-        saturday: { openHours: [hoursSchema], required: true },
-        sunday: { openHours: [hoursSchema], required: true },
-        required: true
+        monday: { openHours: [hoursSchema], required: false },
+        tuesday: { openHours: [hoursSchema], required: false },
+        wednesday: { openHours: [hoursSchema], required: false },
+        thursday: { openHours: [hoursSchema], required: false },
+        friday: { openHours: [hoursSchema], required: false },
+        saturday: { openHours: [hoursSchema], required: false },
+        sunday: { openHours: [hoursSchema], required: false },
+        required: false
     },
     /*
     openingHoursNormal: {
@@ -99,7 +78,7 @@ exports.RestaurantSchema = new Schema({
     belongsTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     },
     created_date: {
         type: Date,
@@ -107,4 +86,15 @@ exports.RestaurantSchema = new Schema({
     }
 });
 exports.Restaurant = mongoose.model('Restaurant', exports.RestaurantSchema);
+function addNewRestaurant(restaurant, callback) {
+    let rest = new exports.Restaurant();
+    rest.restName = restaurant.restName;
+    rest.save(function (err, product) {
+        if (err) {
+            console.log('Error at addNewRestaurant (MODEL): ' + err);
+            callback(rest);
+        }
+    });
+}
+exports.addNewRestaurant = addNewRestaurant;
 //# sourceMappingURL=restaurant.js.map

@@ -1,4 +1,6 @@
 import * as mongoose from 'mongoose';
+import { RestaurantDTO } from "../DTOs/restaurantDTO";
+import {Drink} from "./drink";
 
 const Schema = mongoose.Schema;
 
@@ -10,15 +12,16 @@ interface IHoursSchema extends mongoose.Document {
 var hoursSchema = new Schema({
     open: {
         type: Date,
-        required: true
+        required: false
     },
     close: {
         type: Date,
-        required: true
+        required: false
     }
 });
 export const Hours = mongoose.model<IHoursSchema>('Hours', hoursSchema);
 
+/*
 // OpenHours
 interface IOpenHoursSchema extends mongoose.Document {
     monday: { openHours: [] },
@@ -42,6 +45,7 @@ var openHoursSchema = new Schema({
         required: true
     }
 });
+*/
 
 // OpenHoursHoliday
 interface IOpenHoursHoliday extends mongoose.Document {
@@ -51,11 +55,11 @@ interface IOpenHoursHoliday extends mongoose.Document {
 var openHoursHolidaySchema = new Schema({
     holidayDate: {
         type: Date,
-        required: true
+        required: false
     },
     openHours: {
         type: [hoursSchema],
-        required: true
+        required: false
     }
 });
 export const OpenHoursHoliday = mongoose.model<IOpenHoursHoliday>('OpenHoursHoliday', openHoursHolidaySchema);
@@ -84,23 +88,23 @@ interface IRestaurantSchema extends mongoose.Document {
 export const RestaurantSchema = new Schema({
     restName: {
         type: String,
-        required: true
+        required: false
     },
     restLoc: {
         type: String,
-        required: true
+        required: false
     },
     restPhone: {
         type: [Number],
-        required: true
+        required: false
     },
     restEmail: {
         type: String,
-        required: true
+        required: false
     },
     restSite: {
         type: String,
-        required: true
+        required: false
     },
     additionalInformation: {
         type: String,
@@ -113,22 +117,14 @@ export const RestaurantSchema = new Schema({
     },
     defaultHoursPerDay: {
         // Map should be filled with days and the respective opening hours. This ONLY contains the default opening hours.
-        /*monday: { type: [{
-                type: [
-                    { openHour: Date },
-                    { closingHour: Date }
-                ],
-                day: String
-            }],
-            required: true },*/
-        monday: { openHours: [hoursSchema], required: true },
-        tuesday: { openHours: [hoursSchema], required: true },
-        wednesday: { openHours: [hoursSchema], required: true },
-        thursday: { openHours: [hoursSchema], required: true },
-        friday: { openHours: [hoursSchema], required: true },
-        saturday: { openHours: [hoursSchema], required: true },
-        sunday: { openHours: [hoursSchema], required: true },
-        required: true
+        monday: { openHours: [hoursSchema], required: false },
+        tuesday: { openHours: [hoursSchema], required: false },
+        wednesday: { openHours: [hoursSchema], required: false },
+        thursday: { openHours: [hoursSchema], required: false },
+        friday: { openHours: [hoursSchema], required: false },
+        saturday: { openHours: [hoursSchema], required: false },
+        sunday: { openHours: [hoursSchema], required: false },
+        required: false
     },
     /*
     openingHoursNormal: {
@@ -143,7 +139,7 @@ export const RestaurantSchema = new Schema({
     belongsTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     },
     created_date: {
         type: Date,
@@ -152,3 +148,15 @@ export const RestaurantSchema = new Schema({
 });
 
 export const Restaurant = mongoose.model<IRestaurantSchema>('Restaurant', RestaurantSchema);
+
+export function addNewRestaurant(restaurant: RestaurantDTO, callback: Function) {
+    let rest = new Restaurant();
+    rest.restName = restaurant.restName;
+
+    rest.save( function (err, product) {
+        if (err) {
+            console.log('Error at addNewRestaurant (MODEL): ' + err);
+            callback(rest);
+        }
+    });
+}

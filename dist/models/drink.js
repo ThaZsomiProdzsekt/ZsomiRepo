@@ -14,11 +14,13 @@ exports.DrinkSchema = new Schema({
     },
     size: {
         type: String,
-        required: true
+        required: false,
+        default: 'Normal'
     },
     liter: {
         type: Number,
-        required: true
+        required: false,
+        default: 0.5
     },
     calories: {
         type: Number,
@@ -42,11 +44,12 @@ exports.DrinkSchema = new Schema({
     },
     amountOfAvailable: {
         type: Number,
-        required: true
+        required: false,
+        default: 0
     },
     alcoholPercentage: {
         type: Number,
-        required: true,
+        required: false,
         default: 0
     },
     sugarFree: {
