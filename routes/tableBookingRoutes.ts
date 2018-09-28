@@ -1,18 +1,62 @@
 import { Request, Response } from "express";
-import { createNewTableBooking } from '../models/tableBooking';
+import { createNewTableBooking, changeTableReservation } from '../models/tableBooking';
 import { tableDTO } from "../DTOs/tablesDTO";
 import { addNewConsumer } from '../models/consumer';
 import { ConsumersDTO } from "../DTOs/consumersDTO";
 import {RestaurantDTO} from "../DTOs/restaurantDTO";
 import {addNewRestaurant} from "../models/restaurant";
+import * as mongoose from "mongoose";
 
 export class TableBookingRoutes {
     public tableBookingRoutes(app): void {
-        // NEW DRINK
-        app.route('/newTableBooking').get((req: Request, res: Response) => {
-            var consumer;
-            var cons = new ConsumersDTO('Mr. Im gonna fucking kill you');
-            addNewConsumer(cons,(err, result) => {
+        // Create a new TableBooking for a given Restaurant!
+        app.route('/newTableBooking').post((req: Request, res: Response) => {
+            let belTo: mongoose.Schema.Types.ObjectId = req.body.belTo; // Ezt elvileg lehet, postmanbe müxik, no error
+            let theTables: tableDTO = req.body.theTables;
+            let numOfTables: Number;
+            let numOfChairs: Number;
+            let genAvail: String;
+            if (req.body.numOfTables) numOfTables = req.body.numOfTables;
+            if (req.body.numOfChairs) numOfChairs = req.body.numOfChairs;
+            if (req.body.genAvail) genAvail = req.body.genAvail;
+
+            createNewTableBooking(belTo, theTables, numOfTables, numOfChairs, genAvail, (err, product) => {
+                if (err) {
+                    console.log('Error at /newTableBooking: ' + err);
+                    res.send(JSON.stringify(err));
+                }
+                if (product) {
+                    console.log('Product created at /newTableBooking: ' + product);
+                    res.send(JSON.stringify(product));
+                }
+            });
+        });
+
+        // Change a table reservation of a specific table!
+        app.route('/changeTableReservation').post((req: Request, res: Response) => {
+            // changeTableReservation(tableId: Number, resFrom: Date, cust: any, resTo: Date)
+            let tableId: String = req.body.tableId;
+            let resFrom: Date = req.body.resFrom;
+            let resTo: Date = req.body.resTo;
+            let cust: mongoose.Schema.Types.ObjectId = req.body.cust;
+            let belTo: mongoose.Schema.Types.ObjectId = req.body.belTo;
+
+            changeTableReservation(tableId, resFrom, resTo, cust, belTo, (err, product) => {
+                if (err) {
+                    console.log('Error at /changeTableReservation: ' + err);
+                    res.send(JSON.stringify(err));
+                }
+                if (product) {
+                    console.log('Product created at /changeTableReservation: ' + product);
+                    res.send(JSON.stringify(product));
+                }
+            });
+        });
+
+        //
+    }
+}
+/*
                 if (err) console.log('Error at creating new Consumer (OUTSIDE): ' + err);
                 if (result) {
                     console.log('Successful Result document at creating new Consumer (OUTSIDE): ' + result);
@@ -42,6 +86,4 @@ export class TableBookingRoutes {
                     });
                 }
             });
-        });
-    }
-}
+ */

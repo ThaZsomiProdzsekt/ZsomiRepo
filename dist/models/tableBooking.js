@@ -18,7 +18,8 @@ exports.TableBookingSchema = new Schema({
                 tableID: String,
                 numberOfChairs: Number,
                 reserved: Boolean,
-                location: String, inDoors: Boolean,
+                location: String,
+                inDoors: Boolean,
                 // Ide amúgy simán be lehetne még baszni egy type-ot nem igazán tudom, hogy mire lenne jó...
                 // Bár talán érdemes lenne be required-ezni meg ilyenek, de azzal csak a baj van :) :/
                 reservedDuring: [
@@ -50,15 +51,48 @@ exports.TableBookingSchema = new Schema({
     }
 });
 exports.TableBooking = mongoose.model('TableBooking', exports.TableBookingSchema);
-function changeTableReservation(tableId, resFrom, cust, resTo) {
-    exports.TableBooking.findOneAndUpdate({ 'tables.tableID': tableId }, {
-        '$set': { 'tables.$.reservationTimes.reservedFrom': resFrom,
-            'tables.$.reservationTimes.reservedTo': resTo,
-            'tables.$.reservationTimes.reservedFor': cust, }
-    }, function (err, doc) {
-        if (err)
-            console.log('Error at changeTableReservation: ' + err);
+function changeTableReservation2(tableId, resFrom, resTo, belTo, cust, callback) {
+    exports.TableBooking.update({ 'tables.reservedDuring.reservedFor': cust, 'belongsTo': belTo }, {
+        '$set': {
+            'tables.$.reservedDuring.$.reservedFrom': resFrom,
+            'tables.$.reservedDuring.$.reservedTo': resTo,
+            'tables.$.reservedDuring.$.reservedFor': cust
+        }
+        // A pozíciós operátor ($) szar, mert csak egyszeres tömböknél jó, ahol több értéket kéne, hogy felvegyen
+        // ott már úgy ahogy van szarcsi :(
+    }, {}, function (err, doc) {
+        if (err) {
+            console.log('Error at "changeTableReservation": ' + err);
+            callback(err, null);
+        }
+        if (doc) {
+            console.log('Successfully found documents at "changeTableReservation": ' + doc);
+            doc. //var query = TableBooking.update({});
+                callback(null, doc);
+        }
     });
+}
+exports.changeTableReservation2 = changeTableReservation2;
+function changeTableReservation(tableId, resFrom, resTo, belTo, cust, callback) {
+    exports.TableBooking.aggregate([
+        {
+            '$match': {
+                'belongsTo': belTo,
+            }
+        },
+        {
+            '$addFields': {
+                /*tables: {
+                    reservedDuring : {
+                        reservedFrom: resFrom,
+                        reservedTo: resTo,
+                        reservedFor: cust
+                    }
+                }*/
+                'awdawdawddwa': 99
+            }
+        }
+    ]).then(callback());
 }
 exports.changeTableReservation = changeTableReservation;
 function removeTableReservation(tableId, cust, callback) {
@@ -83,8 +117,10 @@ function setNumberOfTables(tableId, restId, numOfChairs) {
 exports.setNumberOfTables = setNumberOfTables;
 function setTableReservationWithoutCustomer(tableId, reservedFrom, reservedTo) {
     exports.TableBooking.findOneAndUpdate({ 'tables.tableID': tableId }, {
-        '$push': { 'tables.$.reservedDuring.reservedFrom': reservedFrom,
-            'tables.$.reservedDuring.reservedTo': reservedTo },
+        '$push': {
+            'tables.$.reservedDuring.reservedFrom': reservedFrom,
+            'tables.$.reservedDuring.reservedTo': reservedTo
+        },
     }, function (err, doc) {
         if (err)
             console.log("Error at setTableReservation: " + err);
@@ -93,9 +129,11 @@ function setTableReservationWithoutCustomer(tableId, reservedFrom, reservedTo) {
 exports.setTableReservationWithoutCustomer = setTableReservationWithoutCustomer;
 function setTableReservation(tableId, reservedFrom, reservedTo, cons) {
     exports.TableBooking.findOneAndUpdate({ 'tables.tableID': tableId }, {
-        '$push': { 'tables.$.reservedDuring.reservedFrom': reservedFrom,
+        '$push': {
+            'tables.$.reservedDuring.reservedFrom': reservedFrom,
             'tables.$.reservedDuring.reservedTo': reservedTo,
-            'tables.$.reservedDuring.reservedFor': cons },
+            'tables.$.reservedDuring.reservedFor': cons
+        },
     }, function (err, doc) {
         if (err)
             console.log("Error at setTableReservation: " + err);
@@ -119,50 +157,56 @@ exports.deleteExpiredTableReservations = deleteExpiredTableReservations;
 function createNewTableBooking(belTo, theTables, numOfTables, numOfChairs, genAvail, callback) {
     // construct the cucc MIKASAKADA, OH TO HELL WITH IT: SPECIAL BEAM CANNON!
     let tableBooking = new exports.TableBooking();
-    var rsrvationArr = {
+    /*let reservationArray = {
         tableID: theTables.tableID, numberOfChairs: theTables.numberOfChairs, reserved: theTables.reserved,
         location: theTables.location, inDoors: theTables.inDoors, reservedDuring: theTables.reservations
-    };
-    let tblBkng = new exports.TableBooking({
-        chairs: theTables.numberOfChairs
-    });
-    /*
-    tblBkng.save( () => {
-        TableBooking.findByIdAndUpdate(tblBkng._id, {
-            '$set': {'numOfChairs': 9 }
-        }, () =>{
-            console.log('VÉGE');
-        });
-    });
-*/
-    console.log('numOfTables: ' + numOfTables);
-    console.log('numOfChairs: ' + numOfChairs);
-    console.log('genAvail: ' + genAvail);
-    console.log('belTo: ' + belTo);
-    console.log('tableDTO: ' + theTables);
-    tableBooking.numberOfTables = numOfTables;
-    tableBooking.chairs = numOfChairs;
-    tableBooking.generalAvailability = genAvail;
+    };*/
+    if (numOfTables)
+        tableBooking.numberOfTables = numOfTables;
+    if (numOfChairs)
+        tableBooking.chairs = numOfChairs;
+    if (genAvail)
+        tableBooking.generalAvailability = genAvail;
     tableBooking.belongsTo = belTo;
-    console.log('tableID: ' + rsrvationArr.tableID);
-    console.log('numberOfChairs: ' + rsrvationArr.numberOfChairs);
-    console.log('reserved: ' + rsrvationArr.reserved);
-    console.log('location: ' + rsrvationArr.location);
-    console.log('inDoors: ' + rsrvationArr.inDoors);
-    console.log('reservedDuring: ' + rsrvationArr.reservedDuring);
-    //tableBooking.tables.push(rsrvationArr);
-    //tableBooking.markModified('tables');
     tableBooking.save().then(() => {
-        console.log('SUCCESS');
-        exports.TableBooking.findByIdAndUpdate(tableBooking._id, {
-            '$push': { 'tables': rsrvationArr }
-        }, () => {
-            console.log('VÉGE');
+        console.log('Successfully created new TableBooking instance and save()-d to database!');
+        addTables(theTables, tableBooking, callback);
+        /*TableBooking.findByIdAndUpdate(tableBooking._id, {
+            '$push': { 'tables': reservationArray }
+        }, (err, model) =>{
+            if (err) {
+                console.log('There was an error at "createNewTableBooking", at pushing the array: ' + err);
+                callback(err, null);
+            }
+            if (model){
+                console.log('Successfully pushed array to doc at "createNewTableBooking"!');
+                callback(null, model);
+            }
         });
-        tableBooking.markModified('tables');
-    }, () => {
-        'REJECTED';
+        tableBooking.markModified('tables');*/
+    }, (err) => {
+        console.log('Error at save()-ing new TableBooking instance to database!' + err);
+        callback(err);
     });
 }
 exports.createNewTableBooking = createNewTableBooking;
+function addTables(theTables, tblBooking, callback) {
+    let reservationArray = {
+        tableID: theTables.tableID, numberOfChairs: theTables.numberOfChairs, reserved: theTables.reserved,
+        location: theTables.location, inDoors: theTables.inDoors, reservedDuring: theTables.reservations
+    };
+    tblBooking.markModified('tables');
+    exports.TableBooking.findByIdAndUpdate(tblBooking._id, {
+        '$push': { 'tables': reservationArray }
+    }, (err, model) => {
+        if (err) {
+            console.log('There was an error at "createNewTableBooking", at pushing the array: ' + err);
+            callback(err, null);
+        }
+        if (model) {
+            console.log('Successfully pushed array to doc at "createNewTableBooking"!');
+            callback(null, model);
+        }
+    });
+}
 //# sourceMappingURL=tableBooking.js.map
