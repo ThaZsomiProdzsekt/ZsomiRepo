@@ -1,5 +1,6 @@
 export class drinksDTO {
     public name: String;
+    public alternativeNames: String[];
     public size: String;
     public liter: Number;
     public price: Number;
@@ -14,11 +15,12 @@ export class drinksDTO {
     public caffeine: Number;
     public everythingElse: String;
 
-    constructor(name: String, size: String, liter: Number, price: Number) {
+    constructor(name: String, size: String, liter: Number, price: Number, alt: String[]) {
         this.name = name;
         this.size = size;
         this.liter = liter;
         this.price = price;
+        this.alternativeNames = alt;
     }
     
 }

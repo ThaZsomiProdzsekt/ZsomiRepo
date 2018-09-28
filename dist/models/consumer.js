@@ -36,18 +36,18 @@ exports.ConsumerSchema = new Schema({
     }
 });
 exports.Consumer = mongoose.model('Consumer', exports.ConsumerSchema);
-function addNewConsumer(cons, callback) {
+function addNewConsumer(consDTO, callback) {
     let consumer = new exports.Consumer();
-    consumer.name = cons.name;
-    consumer.save(function (err, product) {
+    consumer.name = consDTO.name;
+    consumer.save((err, product) => {
         if (err) {
             console.log('Error at addNewConsumer function (MODEL): ' + err);
-            callback(err);
+            callback(err, null);
         }
         if (product) {
-            console.log('Product created at addNewConsumer function (MODEL): ' + product);
+            console.log('Successful Product created at addNewConsumer function (MODEL): ' + product);
+            callback(null, consumer);
         }
-        callback(consumer);
     });
 }
 exports.addNewConsumer = addNewConsumer;

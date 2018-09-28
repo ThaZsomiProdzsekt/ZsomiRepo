@@ -10,8 +10,8 @@ class DrinksRoutes {
         });
         // NEW DRINK
         app.route('/newDrink').get((req, res) => {
-            var drink = new drinksDTO_1.drinksDTO('kamudrink1', 'kicsi', 0.3, 30);
-            drink_1.addNewDrink(drink, function (err) {
+            var drink = new drinksDTO_1.drinksDTO('kamudrink1', 'kicsi', 0.3, 30, ['asd', 'Burter SUPPORT']);
+            drink_1.addNewDrink(drink, function (err, product) {
                 console.log('Err value: ' + err);
                 res.send('hurray');
             });

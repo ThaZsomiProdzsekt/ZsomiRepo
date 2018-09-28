@@ -13,8 +13,8 @@ export class DrinksRoutes {
 
         // NEW DRINK
         app.route('/newDrink').get((req: Request, res: Response) => {
-            var drink = new drinksDTO('kamudrink1', 'kicsi', 0.3, 30);
-            addNewDrink(drink, function (err) {
+            var drink = new drinksDTO('kamudrink1', 'kicsi', 0.3, 30, ['asd', 'Burter SUPPORT']);
+            addNewDrink(drink, function (err, product) {
                 console.log('Err value: ' + err);
                 res.send('hurray');
             });

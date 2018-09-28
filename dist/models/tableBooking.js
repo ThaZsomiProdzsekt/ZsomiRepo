@@ -8,31 +8,32 @@ exports.TableBookingSchema = new Schema({
         type: Number,
         required: false
     },
-    numberOfChairs: {
+    chairs: {
         type: Number,
         required: false
     },
     tables: {
         type: [
-            { tableID: String },
-            { numberOfChairs: Number },
-            { reserved: Boolean },
-            { location: String },
-            { inDoors: Boolean },
             {
+                tableID: String,
+                numberOfChairs: Number,
+                reserved: Boolean,
+                location: String, inDoors: Boolean,
                 // Ide amúgy simán be lehetne még baszni egy type-ot nem igazán tudom, hogy mire lenne jó...
                 // Bár talán érdemes lenne be required-ezni meg ilyenek, de azzal csak a baj van :) :/
                 reservedDuring: [
-                    { reservedFrom: Date },
-                    { reservedTo: Date },
-                    { reservedFor: {
+                    {
+                        reservedFrom: Date,
+                        reservedTo: Date,
+                        reservedFor: {
                             type: mongoose.Schema.Types.ObjectId,
                             ref: 'Consumer'
                         }
                     }
                 ]
             }
-        ]
+        ],
+        required: false
     },
     generalAvailability: {
         type: String,
@@ -118,22 +119,49 @@ exports.deleteExpiredTableReservations = deleteExpiredTableReservations;
 function createNewTableBooking(belTo, theTables, numOfTables, numOfChairs, genAvail, callback) {
     // construct the cucc MIKASAKADA, OH TO HELL WITH IT: SPECIAL BEAM CANNON!
     let tableBooking = new exports.TableBooking();
-    tableBooking.numberOfTables = numOfTables;
-    tableBooking.numberOFChairs = numOfChairs;
-    tableBooking.generalAvailability = genAvail;
-    tableBooking.belongsTo = belTo;
     var rsrvationArr = {
         tableID: theTables.tableID, numberOfChairs: theTables.numberOfChairs, reserved: theTables.reserved,
         location: theTables.location, inDoors: theTables.inDoors, reservedDuring: theTables.reservations
     };
-    tableBooking.tables.push(rsrvationArr);
-    tableBooking.save(function (err, product) {
-        if (err)
-            console.log('Error at creating new createNewTableBooking (MODEL) Error: ' + err);
-        if (err && callback)
-            callback(err);
-        if (product && callback)
-            callback(product);
+    let tblBkng = new exports.TableBooking({
+        chairs: theTables.numberOfChairs
+    });
+    /*
+    tblBkng.save( () => {
+        TableBooking.findByIdAndUpdate(tblBkng._id, {
+            '$set': {'numOfChairs': 9 }
+        }, () =>{
+            console.log('VÉGE');
+        });
+    });
+*/
+    console.log('numOfTables: ' + numOfTables);
+    console.log('numOfChairs: ' + numOfChairs);
+    console.log('genAvail: ' + genAvail);
+    console.log('belTo: ' + belTo);
+    console.log('tableDTO: ' + theTables);
+    tableBooking.numberOfTables = numOfTables;
+    tableBooking.chairs = numOfChairs;
+    tableBooking.generalAvailability = genAvail;
+    tableBooking.belongsTo = belTo;
+    console.log('tableID: ' + rsrvationArr.tableID);
+    console.log('numberOfChairs: ' + rsrvationArr.numberOfChairs);
+    console.log('reserved: ' + rsrvationArr.reserved);
+    console.log('location: ' + rsrvationArr.location);
+    console.log('inDoors: ' + rsrvationArr.inDoors);
+    console.log('reservedDuring: ' + rsrvationArr.reservedDuring);
+    //tableBooking.tables.push(rsrvationArr);
+    //tableBooking.markModified('tables');
+    tableBooking.save().then(() => {
+        console.log('SUCCESS');
+        exports.TableBooking.findByIdAndUpdate(tableBooking._id, {
+            '$push': { 'tables': rsrvationArr }
+        }, () => {
+            console.log('VÉGE');
+        });
+        tableBooking.markModified('tables');
+    }, () => {
+        'REJECTED';
     });
 }
 exports.createNewTableBooking = createNewTableBooking;

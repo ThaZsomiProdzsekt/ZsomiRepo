@@ -92,7 +92,11 @@ function addNewRestaurant(restaurant, callback) {
     rest.save(function (err, product) {
         if (err) {
             console.log('Error at addNewRestaurant (MODEL): ' + err);
-            callback(rest);
+            callback(err, null);
+        }
+        if (product) {
+            console.log('Successful Product created at addNewRestaurant (MODEL): ' + product);
+            callback(null, product);
         }
     });
 }

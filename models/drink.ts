@@ -7,6 +7,7 @@ const Schema = mongoose.Schema;
 
 export interface IDrink extends mongoose.Document {
     name: String;
+    alternativeNames: String[];
     price: Number;
     size: String;
     liter: Number;
@@ -26,6 +27,10 @@ export interface IDrink extends mongoose.Document {
 export const DrinkSchema = new Schema({
     name: {
         type: String,
+        required: false
+    },
+    alternativeNames: {
+        type: [String],
         required: false
     },
     price: {
@@ -107,11 +112,13 @@ export function addNewDrink(drinksDTO: drinksDTO, callback: Function) {
     drink.price = drinksDTO.price;
     drink.size = drinksDTO.size;
     drink.liter = drinksDTO.liter;
+    drink.alternativeNames = drinksDTO.alternativeNames;
 
     drink.save( (err, product) => {
         if (err) {
             console.log('Error at adding new Drink: ' + err);
             callback(err);
         }
+        if (product) callback(product);
     });
 }

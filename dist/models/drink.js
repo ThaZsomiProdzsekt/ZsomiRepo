@@ -7,6 +7,10 @@ exports.DrinkSchema = new Schema({
         type: String,
         required: false
     },
+    alternativeNames: {
+        type: [String],
+        required: false
+    },
     price: {
         type: Number,
         required: false,
@@ -84,11 +88,14 @@ function addNewDrink(drinksDTO, callback) {
     drink.price = drinksDTO.price;
     drink.size = drinksDTO.size;
     drink.liter = drinksDTO.liter;
+    drink.alternativeNames = drinksDTO.alternativeNames;
     drink.save((err, product) => {
         if (err) {
             console.log('Error at adding new Drink: ' + err);
             callback(err);
         }
+        if (product)
+            callback(product);
     });
 }
 exports.addNewDrink = addNewDrink;

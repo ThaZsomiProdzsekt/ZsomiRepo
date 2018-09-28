@@ -13,7 +13,7 @@ export class ConsumersRoutes {
             let cons = new ConsumersDTO('Mr. Im gonna fucking kill you');
             addNewConsumer(cons, (err, result) => {
                 if (err) console.log('Error at endpoint /newCustomer: ' + err);
-                if (result) console.log('Result document at /newCustomer: ' + result);
+                if (result) console.log('Successful Result document at /newCustomer: ' + result);
                 res.send(result);
             });
         });
