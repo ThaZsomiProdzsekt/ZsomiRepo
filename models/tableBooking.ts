@@ -90,37 +90,50 @@ export function changeTableReservation2(tableId: String, resFrom: Date, resTo: D
 
 export function changeTableReservation(tableId: String, resFrom: Date, resTo: Date, belTo: mongoose.Schema.Types.ObjectId,
                                        cust: mongoose.Schema.Types.ObjectId, callback: Function) {
+    var boy;
     TableBooking.aggregate(
         [
-            {
-                '$match': {
-                    'belongsTo': belTo,
-                    /*
-                    tables: {
-                        reservedDuring: {
-                            '$elemMatch': {
-                                reservedFor: cust
+
+            { $match: {
+                'tables': {
+                    $elemMatch: {
+                        'reservedDuring': {
+                            $elemMatch: {
+                                'reservedFor': mongoose.Types.ObjectId('5bad2b56c9ab893aac775f46')
                             }
                         }
                     }
-                    */
-                }
+                }}
             },
-            {
-                '$addFields': {
-                    /*tables: {
-                        reservedDuring : {
-                            reservedFrom: resFrom,
-                            reservedTo: resTo,
-                            reservedFor: cust
-                        }
-                    }*/
-                    'awdawdawddwa': 99
+            /*{
+            $addFields: {
+                'tables': {
+                    'reservedDuring': {
+                        'reservedFor': mongoose.Types.ObjectId('888888888888888888888888')
+                    }
                 }
             }
-        ]).then(
-            callback()
-    );
+        }, {
+            $out: 'tablebooking2'
+        }*/
+        ]).then( (doc) => {
+            boy = doc;
+            //console.log(doc);
+        for (let asd in doc) {
+            var kek = doc[0];
+            //console.log(kek.values());
+            console.log('KILL HIM');
+            console.log(kek['_id']);
+            callback(null, doc);
+        }
+        });
+
+
+    TableBooking.findByIdAndUpdate();
+    let tblBooking = new TableBooking();
+   /* tblBooking.save().then((boy) => {
+        console.log(boy);
+    });*/
 }
 
 export function removeTableReservation(tableId: Number, cust: any, callback: Function) {
