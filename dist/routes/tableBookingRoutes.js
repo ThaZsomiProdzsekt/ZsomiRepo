@@ -30,12 +30,65 @@ class TableBookingRoutes {
         // Change a table reservation of a specific table!
         app.route('/changeTableReservation').post((req, res) => {
             // changeTableReservation(tableId: Number, resFrom: Date, cust: any, resTo: Date)
+            console.log('Beléptünk a /chageTableReservation-ra! ');
             let tableId = req.body.tableId;
             let resFrom = req.body.resFrom;
             let resTo = req.body.resTo;
             let cust = req.body.cust;
             let belTo = req.body.belTo;
-            tableBooking_1.changeTableReservation(tableId, resFrom, resTo, cust, belTo, (err, product) => {
+            tableBooking_1.changeTableReservation(tableId, resFrom, resTo, belTo, cust, (err, product) => {
+                if (err) {
+                    console.log('Error at /changeTableReservation: ' + err);
+                    res.send(JSON.stringify(err));
+                }
+                if (product) {
+                    console.log('Product created at /changeTableReservation: ' + product);
+                    res.send(JSON.stringify(product));
+                }
+            });
+        });
+        app.route('/changeTableReservation2').post((req, res) => {
+            // changeTableReservation(tableId: Number, resFrom: Date, cust: any, resTo: Date)
+            console.log('Beléptünk a /chageTableReservation2-ba! ');
+            let tableId = req.body.tableId;
+            let resFrom = req.body.resFrom;
+            let resTo = req.body.resTo;
+            let cust = req.body.cust;
+            let belTo = req.body.belTo;
+            tableBooking_1.changeTableReservation2(tableId, resFrom, resTo, belTo, cust, (err, product) => {
+                if (err) {
+                    console.log('Error at /changeTableReservation: ' + err);
+                    res.send(JSON.stringify(err));
+                }
+                if (product) {
+                    console.log('Product created at /changeTableReservation: ' + product);
+                    res.send(JSON.stringify(product));
+                }
+            });
+        });
+        app.route('/changeTableReservation3').post((req, res) => {
+            // changeTableReservation(tableId: Number, resFrom: Date, cust: any, resTo: Date)
+            console.log('Beléptünk a /chageTableReservation-ra! ');
+            let tableId = req.body.tableId;
+            let resFrom = req.body.resFrom;
+            let resTo = req.body.resTo;
+            let cust = req.body.cust;
+            let belTo = req.body.belTo;
+            tableBooking_1.changeTableReservation3(tableId, resFrom, resTo, belTo, cust, (err, product) => {
+                if (err) {
+                    console.log('Error at /changeTableReservation: ' + err);
+                    res.send(JSON.stringify(err));
+                }
+                if (product) {
+                    console.log('Product created at /changeTableReservation: ' + product);
+                    res.send(JSON.stringify(product));
+                }
+            });
+        });
+        app.route('/vegetayes').post((req, res) => {
+            // changeTableReservation(tableId: Number, resFrom: Date, cust: any, resTo: Date)
+            console.log('Beléptünk a /vegetaYes-be');
+            tableBooking_1.getCustomerFromPhone("06304445555", "5bade1066eab8e29c05a7c48", (err, product) => {
                 if (err) {
                     console.log('Error at /changeTableReservation: ' + err);
                     res.send(JSON.stringify(err));
@@ -80,5 +133,5 @@ exports.TableBookingRoutes = TableBookingRoutes;
                     });
                 }
             });
- */ 
+ */
 //# sourceMappingURL=tableBookingRoutes.js.map

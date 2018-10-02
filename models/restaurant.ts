@@ -65,7 +65,7 @@ var openHoursHolidaySchema = new Schema({
 export const OpenHoursHoliday = mongoose.model<IOpenHoursHoliday>('OpenHoursHoliday', openHoursHolidaySchema);
 
 //Restaurant
-interface IRestaurantSchema extends mongoose.Document {
+export interface IRestaurant extends mongoose.Document {
     restName: String;
     restLoc: String;
     restPhone: [Number];
@@ -147,7 +147,7 @@ export const RestaurantSchema = new Schema({
     }
 });
 
-export const Restaurant = mongoose.model<IRestaurantSchema>('Restaurant', RestaurantSchema);
+export const Restaurant = mongoose.model<IRestaurant>('Restaurant', RestaurantSchema);
 
 export function addNewRestaurant(restaurant: RestaurantDTO, callback: Function) {
     let rest = new Restaurant();

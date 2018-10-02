@@ -12,30 +12,27 @@ exports.TableBookingSchema = new Schema({
         type: Number,
         required: false
     },
-    tables: {
-        type: [
-            {
-                tableID: String,
-                numberOfChairs: Number,
-                reserved: Boolean,
-                location: String,
-                inDoors: Boolean,
-                // Ide amúgy simán be lehetne még baszni egy type-ot nem igazán tudom, hogy mire lenne jó...
-                // Bár talán érdemes lenne be required-ezni meg ilyenek, de azzal csak a baj van :) :/
-                reservedDuring: [
-                    {
-                        reservedFrom: Date,
-                        reservedTo: Date,
-                        reservedFor: {
-                            type: mongoose.Schema.Types.ObjectId,
-                            ref: 'Consumer'
-                        }
+    tables: [
+        {
+            tableID: String,
+            numberOfChairs: Number,
+            reserved: Boolean,
+            location: String,
+            inDoors: Boolean,
+            // Ide amúgy simán be lehetne még baszni egy type-ot nem igazán tudom, hogy mire lenne jó...
+            // Bár talán érdemes lenne be required-ezni meg ilyenek, de azzal csak a baj van :) :/
+            reservedDuring: [
+                {
+                    reservedFrom: Date,
+                    reservedTo: Date,
+                    reservedFor: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'Consumer'
                     }
-                ]
-            }
-        ],
-        required: false
-    },
+                }
+            ]
+        }
+    ],
     generalAvailability: {
         type: String,
         required: false
@@ -51,48 +48,101 @@ exports.TableBookingSchema = new Schema({
     }
 });
 exports.TableBooking = mongoose.model('TableBooking', exports.TableBookingSchema);
+function changeTableReservation3(tableId, resFrom, resTo, belTo, cust, callback) {
+    exports.TableBooking.find({
+        'belongsTo': mongoose.Types.ObjectId(belTo),
+        'tables.reservedDuring.reservedFor': mongoose.Types.ObjectId(cust),
+    }).then((doc) => {
+        console.log('DOC: ');
+        console.log(doc);
+        console.log('DOC: ');
+        console.log(doc);
+        //doc.
+    });
+}
+exports.changeTableReservation3 = changeTableReservation3;
+function getCustomerFromPhone(phone, belTo, callback) {
+    exports.TableBooking.findOne({
+    //'belongsTo': mongoose.Types.ObjectId(belTo),
+    }).populate('belongsTo', {}, {}, {}, {}).
+        exec().then((doc) => {
+        console.log('The author is %s', doc);
+        console.log(doc);
+    });
+    //match: { phone: phone }
+}
+exports.getCustomerFromPhone = getCustomerFromPhone;
 function changeTableReservation2(tableId, resFrom, resTo, belTo, cust, callback) {
-    exports.TableBooking.update({ 'tables.reservedDuring.reservedFor': cust, 'belongsTo': belTo }, {
-        '$set': {
-            'tables.$.reservedDuring.$.reservedFrom': resFrom,
-            'tables.$.reservedDuring.$.reservedTo': resTo,
-            'tables.$.reservedDuring.$.reservedFor': cust
+    exports.TableBooking.updateMany({
+        'belongsTo': mongoose.Types.ObjectId(belTo)
+    }, {
+        // 'tables.reservedDuring.reservedFor': cust, 'belongsTo': belTo
+        $set: {
+            'tables.$[].reservedDuring.$[arr].reservedFrom': new Date(Date.now()),
         }
-        // A pozíciós operátor ($) szar, mert csak egyszeres tömböknél jó, ahol több értéket kéne, hogy felvegyen
-        // ott már úgy ahogy van szarcsi :(
-    }, {}, function (err, doc) {
-        if (err) {
+    }, {
+        arrayFilters: [{
+                'arr.reservedFrom': { $gte: new Date(Date.now()) }
+            }],
+    }).exec().then(function (doc) {
+        /*if (err) {
             console.log('Error at "changeTableReservation": ' + err);
             callback(err, null);
-        }
+        }*/
         if (doc) {
-            console.log('Successfully found documents at "changeTableReservation": ' + doc);
-            doc. //var query = TableBooking.update({});
-                callback(null, doc);
+            console.log('Successfully found documents at "changeTableReservation" doc: ');
+            console.log(doc);
+            //var query = TableBooking.update({});
+            callback(null, doc);
         }
     });
 }
 exports.changeTableReservation2 = changeTableReservation2;
 function changeTableReservation(tableId, resFrom, resTo, belTo, cust, callback) {
+    var boy;
+    console.log('cust: +');
+    console.log(cust);
     exports.TableBooking.aggregate([
         {
-            '$match': {
-                'belongsTo': belTo,
+            $match: {
+                'belongsTo': mongoose.Types.ObjectId(belTo),
+                'tables': {
+                    $elemMatch: {
+                        'reservedDuring': {
+                            $elemMatch: {
+                                'reservedFor': mongoose.Types.ObjectId(cust)
+                            }
+                        }
+                    }
+                }
             }
         },
-        {
-            '$addFields': {
-                /*tables: {
-                    reservedDuring : {
-                        reservedFrom: resFrom,
-                        reservedTo: resTo,
-                        reservedFor: cust
-                    }
-                }*/
-                'awdawdawddwa': 99
-            }
+    ]).then((doc) => {
+        boy = doc;
+        //console.log(doc);
+        for (let asd in doc) {
+            var kek = doc[0];
+            //console.log(kek.values());
+            console.log(doc);
+            console.log('KILL HIM - 0.dik item obj id');
+            console.log(kek['_id']);
+            console.log('KILL HIM - tables from KEK');
+            console.log(kek['tables']);
+            var tables = kek['tables'];
+            console.log('KILL HIM - tables');
+            console.log(tables);
+            var reservedDuring_temp = tables[0];
+            var reservedDuring = reservedDuring_temp['reservedDuring'];
+            console.log('KILL HIM - reservedDuring');
+            console.log(reservedDuring);
+            callback(null, doc);
         }
-    ]).then(callback());
+    });
+    //TableBooking.findByIdAndUpdate();
+    let tblBooking = new exports.TableBooking();
+    /* tblBooking.save().then((boy) => {
+         console.log(boy);
+     });*/
 }
 exports.changeTableReservation = changeTableReservation;
 function removeTableReservation(tableId, cust, callback) {

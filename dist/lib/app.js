@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bodyParser = require("body-parser");
-const drinksRoutes_1 = require("../routes/drinksRoutes");
 const database_1 = require("../config/database");
+const drinksRoutes_1 = require("../routes/drinksRoutes");
 const tableBookingRoutes_1 = require("../routes/tableBookingRoutes");
 class App {
     constructor() {
@@ -12,6 +12,8 @@ class App {
         this.mongoSetup();
         this.app = express();
         this.config();
+        this.consModel = require('../models/restaurant');
+        this.tblBooking = require('../models/tableBooking');
         this.routePrv.drinksRoutes(this.app);
         this.routeLfsz.tableBookingRoutes(this.app);
     }

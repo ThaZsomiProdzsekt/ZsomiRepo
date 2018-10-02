@@ -1,20 +1,25 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as redis from 'redis';
-import { DrinksRoutes } from "../routes/drinksRoutes";
 import * as mongoose from "mongoose";
 import { DBConfig } from "../config/database";
-import {TableBookingRoutes} from "../routes/tableBookingRoutes";
+import { DrinksRoutes } from "../routes/drinksRoutes";
+import { TableBookingRoutes } from "../routes/tableBookingRoutes";
+import {Consumer} from "../models/consumer";
 
 class App {
     public app: express.Application;
     public routePrv: DrinksRoutes = new DrinksRoutes();
     public routeLfsz: TableBookingRoutes = new TableBookingRoutes();
+    public consModel: any;
+    public tblBooking: any;
 
     constructor() {
         this.mongoSetup();
         this.app = express();
         this.config();
+        this.consModel = require('../models/restaurant');
+        this.tblBooking = require('../models/tableBooking');
         this.routePrv.drinksRoutes(this.app);
         this.routeLfsz.tableBookingRoutes(this.app);
     }
