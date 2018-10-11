@@ -53,9 +53,11 @@ class TableBookingRoutes {
             let tableId = req.body.tableId;
             let resFrom = req.body.resFrom;
             let resTo = req.body.resTo;
-            let cust = req.body.cust;
             let belTo = req.body.belTo;
-            tableBooking_1.changeTableReservation2(tableId, resFrom, resTo, belTo, cust, (err, product) => {
+            let phone = req.body.phone;
+            /*  belTo: string, tableId?: String, resFrom?: Date, resTo?: Date,
+                name?: string, phone?: string,  callback?: Function  */
+            tableBooking_1.changeTableReservation2(belTo, tableId, resFrom, resTo, name, phone, (err, product) => {
                 if (err) {
                     console.log('Error at /changeTableReservation: ' + err);
                     res.send(JSON.stringify(err));
@@ -99,7 +101,30 @@ class TableBookingRoutes {
                 }
             });
         });
-        //
+        app.route('/deleteExpiredReservations').get((req, res) => {
+            console.log('Beléptünk a "/deleteExpiredReservations"-ba');
+            tableBooking_1.deleteExpiredTableReservations((err, doc) => {
+                if (err)
+                    res.send(JSON.stringify((err)));
+                if (doc)
+                    res.send('Successfully deleted expired items');
+            });
+        });
+        //removeTableReserv
+        app.route('/removeTableReserv').post((req, res) => {
+            console.log('Beléptünk a "/removeTableReserv"-ba');
+            let name = req.body.name;
+            let phone = req.body.phone;
+            let belTo = req.body.belTo;
+            let lofasz = tableBooking_1.removeTableReservation(name, phone, belTo, (err, doc) => {
+                if (err)
+                    console.log(err);
+                if (doc)
+                    console.log(doc);
+            });
+            console.log('LOFASZ: ');
+            console.log(lofasz);
+        });
     }
 }
 exports.TableBookingRoutes = TableBookingRoutes;

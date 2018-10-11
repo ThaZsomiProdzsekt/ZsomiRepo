@@ -5,10 +5,14 @@ const bodyParser = require("body-parser");
 const database_1 = require("../config/database");
 const drinksRoutes_1 = require("../routes/drinksRoutes");
 const tableBookingRoutes_1 = require("../routes/tableBookingRoutes");
+const consumersRoutes_1 = require("../routes/consumersRoutes");
+const ordersRoutes_1 = require("../routes/ordersRoutes");
 class App {
     constructor() {
         this.routePrv = new drinksRoutes_1.DrinksRoutes();
         this.routeLfsz = new tableBookingRoutes_1.TableBookingRoutes();
+        this.routeCnsmr = new consumersRoutes_1.ConsumersRoutes();
+        this.routeOrdrs = new ordersRoutes_1.OrdersRoutes();
         this.mongoSetup();
         this.app = express();
         this.config();
@@ -16,6 +20,8 @@ class App {
         this.tblBooking = require('../models/tableBooking');
         this.routePrv.drinksRoutes(this.app);
         this.routeLfsz.tableBookingRoutes(this.app);
+        this.routeCnsmr.consumersRoutes(this.app);
+        this.routeOrdrs.ordersRoutes(this.app);
     }
     /*
         private routes(app: any): void {

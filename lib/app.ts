@@ -5,12 +5,15 @@ import * as mongoose from "mongoose";
 import { DBConfig } from "../config/database";
 import { DrinksRoutes } from "../routes/drinksRoutes";
 import { TableBookingRoutes } from "../routes/tableBookingRoutes";
-import {Consumer} from "../models/consumer";
+import { ConsumersRoutes } from "../routes/consumersRoutes";
+import {OrdersRoutes} from "../routes/ordersRoutes";
 
 class App {
     public app: express.Application;
     public routePrv: DrinksRoutes = new DrinksRoutes();
     public routeLfsz: TableBookingRoutes = new TableBookingRoutes();
+    public routeCnsmr: ConsumersRoutes = new ConsumersRoutes();
+    public routeOrdrs: OrdersRoutes = new OrdersRoutes();
     public consModel: any;
     public tblBooking: any;
 
@@ -22,6 +25,8 @@ class App {
         this.tblBooking = require('../models/tableBooking');
         this.routePrv.drinksRoutes(this.app);
         this.routeLfsz.tableBookingRoutes(this.app);
+        this.routeCnsmr.consumersRoutes(this.app);
+        this.routeOrdrs.ordersRoutes(this.app);
     }
 /*
     private routes(app: any): void {

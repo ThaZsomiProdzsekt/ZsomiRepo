@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import {model} from 'mongoose';
-import {IConsumer, Consumer, ConsumerSchema} from "./consumer";
+import {IConsumer, Consumer, ConsumerSchema, getCustomerId_Phone_Name, getCustomerNameFromPhone} from "./consumer";
 import * as rest from './restaurant';
 import {Restaurant, RestaurantSchema, IRestaurant} from './restaurant';
 import {tableDTO} from '../DTOs/tablesDTO';
@@ -65,6 +65,7 @@ export const TableBookingSchema = new Schema({
 
 export const TableBooking = mongoose.model<ITableBooking>('TableBooking', TableBookingSchema);
 
+
 export function changeTableReservation3(tableId: String, resFrom: Date, resTo: Date, belTo: string,
                                         cust: string, callback: Function) {
     TableBooking.find({
@@ -79,6 +80,7 @@ export function changeTableReservation3(tableId: String, resFrom: Date, resTo: D
     });
 }
 
+
 export function getCustomerFromPhone(phone: string | number, belTo: string, callback: Function) {
     TableBooking.findOne({
         //'belongsTo': mongoose.Types.ObjectId(belTo),
@@ -90,36 +92,42 @@ export function getCustomerFromPhone(phone: string | number, belTo: string, call
 //match: { phone: phone }
 }
 
-export function changeTableReservation2(tableId: String, resFrom: Date, resTo: Date, belTo: string,
-                                        cust: string, callback: Function) {
-    TableBooking.updateMany({
-        'belongsTo': mongoose.Types.ObjectId(belTo)
-    }, {
-        // 'tables.reservedDuring.reservedFor': cust, 'belongsTo': belTo
-        $set: {
-            'tables.$[].reservedDuring.$[arr].reservedFrom': new Date(Date.now()),
-            //'tables.$[].reservedDuring.$[arr].reservedTo': Date.now,
-            //'tables.$[].reservedDuring.$[s].reservedFor': cust
+// TODO: testing
+export function changeTableReservation2(belTo: string, tableId?: String, resFrom?: Date, resTo?: Date,
+                                        name?: string, phone?: string,  callback?: Function) {
+    let custId;
+    try {
+        custId = getCustomerId_Phone_Name(name, phone);
+        if (custId != null) {
+            TableBooking.updateMany({
+                'belongsTo': mongoose.Types.ObjectId(belTo)
+            }, {
+                $set: {
+                    'tables.$[].reservedDuring.$[arr].reservedFrom': resFrom,
+                    'tables.$[].reservedDuring.$[arr].reservedTo': resTo
+                }
+            }, {
+                arrayFilters: [{
+                    'arr.reservedFor': mongoose.Types.ObjectId(custId)
+                }],
+                multi: true
+            },).exec().then(function (doc) {
+                if (doc) {
+                    console.log('Successfully found documents at "changeTableReservation2" doc: ');
+                    console.log(doc);
+                    callback(null, doc);
+                }
+            }).catch( (err) => {
+                console.log('Error at changeTableReservation2: ' + err);
+                callback(err, null);
+            });
         }
-    }, {
-        arrayFilters: [{
-            'arr.reservedFrom': { $gte: new Date(Date.now()) }
-        }],
-        //multi: true
-    },).exec().then(function (doc) {
-        /*if (err) {
-            console.log('Error at "changeTableReservation": ' + err);
-            callback(err, null);
-        }*/
-        if (doc) {
-            console.log('Successfully found documents at "changeTableReservation" doc: ');
-            console.log(doc);
-            //var query = TableBooking.update({});
-            callback(null, doc);
-        }
-    });
+    } catch(err) {
+        callback(err);
+    }
 }
 
+//dummy
 export function changeTableReservation(tableId: String, resFrom: Date, resTo: Date, belTo: string,
                                        cust: string, callback: Function) {
     var boy;
@@ -173,27 +181,68 @@ export function changeTableReservation(tableId: String, resFrom: Date, resTo: Da
             callback(null, doc);
         }
     });
-
-
-    //TableBooking.findByIdAndUpdate();
-    let tblBooking = new TableBooking();
-    /* tblBooking.save().then((boy) => {
-         console.log(boy);
-     });*/
 }
 
-export function removeTableReservation(tableId: Number, cust: any, callback: Function) {
-    TableBooking.findOneAndUpdate({'tables.tableID': tableId}, {
-        '$pull': {'tables.reservedDuring.reservedFor': {'$eq': cust}}
-    }, function (err, doc) {
-        if (err) console.log('Error happened at removeTableReservation: ' + err);
-        callback();
-    });
+/*
+* TableBooking.updateMany({
+                'belongsTo': mongoose.Types.ObjectId(belTo)
+            }, {
+                $set: {
+                    'tables.$[].reservedDuring.$[arr].reservedFrom': resFrom,
+                    'tables.$[].reservedDuring.$[arr].reservedTo': resTo
+                }
+            }, {
+                arrayFilters: [{
+                    'arr.resTo': mongoose.Types.ObjectId(custId)
+                }],
+                multi: true
+            },).exec().then(function (doc) {
+                if (doc) {
+                    console.log('Successfully found documents at "changeTableReservation2" doc: ');
+                    console.log(doc);
+                    callback(null, doc);
+                }
+            }).catch( (err) => {
+                console.log('Error at changeTableReservation2: ' + err);
+                callback(err, null);
+            });
+* */
+
+// TODO: Müxik elvileg
+export async function removeTableReservation(custName?: string, custPhone?: string, belTo?: string, callback?: Function) {
+    let custId;
+    try {
+        custId = await getCustomerId_Phone_Name(custName, custPhone);
+        console.log('custId értéke: ');
+        console.log(custId);
+
+        TableBooking.updateMany({
+            'belongsTo': mongoose.Types.ObjectId(belTo)
+        }, {
+            $pull: {
+                //'tables.$[].reservedDuring': { 'reservedTo': { $lte: new Date(Date.now()) } }
+                'tables.$[].reservedDuring': { 'reservedFor': { $eq: mongoose.Types.ObjectId(custId) } }
+            }
+        }, {
+            multi: true
+        },).exec().then(function (doc) {
+            if (doc) {
+                console.log('Successfully found documents at "removeTableReservation" doc: ');
+                console.log(doc);
+                callback(null, doc);
+            }
+        }).catch( (err) => {
+            console.log('Error at removeTableReservation: ' + err);
+            callback(err, null);
+        });
+    } catch (err) {
+        callback(err, null);
+    }
 }
 
 export function setNumberOfTables(tableId: Number, restId: Number, numOfChairs: Number) {
     TableBooking.findOneAndUpdate({'tables.tableID': tableId}, {
-        '$set': {'tables.$.numberOfChairs': numOfChairs}
+        '$set': { 'tables.$.numberOfChairs': numOfChairs }
     }, function (err, doc) {
         if (err) console.log("Error at setNumberOfTables: " + err);
         // SHI HI HO HI
@@ -228,13 +277,21 @@ export function setTableReservation(tableId: Number, reservedFrom: Date, reserve
 /**
  * Function to be called. Cleans all the expired Table Reservations from the tables array from all docs.
  */
-export function deleteExpiredTableReservations() {
-    TableBooking.update({}, {
-        // ??? fasztuggya hogy müxik-e :D
-        '$pull': {'tables.reservedDuring': {'reservedTo': {'$lte': Date.now()}}}
-    }, function (err, res) {
-        if (err) console.log('Error at the deleteExpiredTableReservations: ' + err);
-        // ASDF
+export function deleteExpiredTableReservations(callback: Function) {
+    // TESTED, MÜXIK
+    TableBooking.updateMany({}, {
+        $pull: {
+            'tables.$[].reservedDuring': { 'reservedTo': { $lte: new Date(Date.now()) } }
+        }
+    }).exec().then(function (doc) {
+        if (doc) {
+            console.log('Successfully deleted documents at "deleteExpiredTableReservations" doc: ');
+            console.log(doc);
+            callback(null, doc);
+        }
+    }).catch( (err) => {
+        console.log('Error at deleteExpiredTableReservations: ' + err);
+        callback(err, null);
     });
 }
 
@@ -242,10 +299,6 @@ export function createNewTableBooking(belTo: mongoose.Schema.Types.ObjectId, the
                                       numOfTables?: Number, numOfChairs?: Number, genAvail?: String, callback?: Function) {
     // construct the cucc MIKASAKADA, OH TO HELL WITH IT: SPECIAL BEAM CANNON!
     let tableBooking = new TableBooking();
-    /*let reservationArray = {
-        tableID: theTables.tableID, numberOfChairs: theTables.numberOfChairs, reserved: theTables.reserved,
-        location: theTables.location, inDoors: theTables.inDoors, reservedDuring: theTables.reservations
-    };*/
     if (numOfTables) tableBooking.numberOfTables = numOfTables;
     if (numOfChairs) tableBooking.chairs = numOfChairs;
     if (genAvail) tableBooking.generalAvailability = genAvail;
@@ -254,19 +307,6 @@ export function createNewTableBooking(belTo: mongoose.Schema.Types.ObjectId, the
     tableBooking.save().then(() => {
         console.log('Successfully created new TableBooking instance and save()-d to database!');
         addTables(theTables, tableBooking, callback);
-        /*TableBooking.findByIdAndUpdate(tableBooking._id, {
-            '$push': { 'tables': reservationArray }
-        }, (err, model) =>{
-            if (err) {
-                console.log('There was an error at "createNewTableBooking", at pushing the array: ' + err);
-                callback(err, null);
-            }
-            if (model){
-                console.log('Successfully pushed array to doc at "createNewTableBooking"!');
-                callback(null, model);
-            }
-        });
-        tableBooking.markModified('tables');*/
     }, (err) => {
         console.log('Error at save()-ing new TableBooking instance to database!' + err);
         callback(err);

@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 exports.OrderSchema = new Schema({
     orderDate: {
-        type: Date,
+        type: mongoose.SchemaTypes.Date,
         required: false
     },
     orderMeal: {
@@ -24,41 +24,57 @@ exports.OrderSchema = new Schema({
         required: false
     },
     consumerName: {
-        type: String,
+        type: mongoose.SchemaTypes.String,
         required: false
     },
     consumerPhone: {
-        type: String,
+        type: mongoose.SchemaTypes.String,
         required: false
     },
     consumerAddress: {
-        type: String,
+        type: mongoose.SchemaTypes.String,
         required: false
     },
     orderFromPhone: {
-        type: Boolean,
+        type: mongoose.SchemaTypes.Boolean,
         required: false,
         default: false
     },
     orderFromWeb: {
-        type: Boolean,
+        type: mongoose.SchemaTypes.Boolean,
         required: false,
         default: true
     },
     orderPersonally: {
-        type: Boolean,
+        type: mongoose.SchemaTypes.Boolean,
         required: false,
         default: false
     },
     tableReservations: {
-        type: Number,
+        type: mongoose.SchemaTypes.Number,
         required: false,
         default: 0
     },
     created_date: {
-        type: Date,
+        type: mongoose.SchemaTypes.Date,
         default: Date.now
     }
 });
 exports.Order = mongoose.model('Order', exports.OrderSchema);
+function addNewOrder(orderDTO, callback) {
+    let name = orderDTO.consumerName;
+    let order = new exports.Order();
+    order.consumerName = name;
+    order.save((err, product) => {
+        if (err) {
+            console.log('Error at addNewConsumer function (MODEL): ' + err);
+            callback(err, null);
+        }
+        if (product) {
+            console.log('Successful Product created at addNewConsumer function (MODEL): ' + product);
+            callback(null, product);
+        }
+    });
+}
+exports.addNewOrder = addNewOrder;
 //# sourceMappingURL=order.js.map

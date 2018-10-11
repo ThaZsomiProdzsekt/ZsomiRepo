@@ -1,0 +1,35 @@
+TODO faszságok, amikre innentől kurvára figyelni kéne:
+
+
+
+2., Az adattárolásokat (nevet stb.-t), gyakorlatilag mindent amire regexekkel keresünk lowercase-esni, meg ilyenek.
+    Legjobb lenne felvenni egy mapet, vagy egy listát amiben "alternative" verziók vannak.
+    - Regex alapú keresés telefonszámra.
+    - A neveket lelowercasezni
+
+3., Megcsinálni normálisra a regexeket is, megírni a lehető leggenerikebbre.
+
+4., DTO-knak megcsinálni az overloadolt konstruktorokat!
+
+TEST SUITE CUCCOK:
+ - NAME REGES ISSUE-t LETESZTELNI TELJESEN!
+
+
+FÁJLONKÉNTI MEGOLDÁSOK:
+1) Consumer-ek (TODO):
+    - Rendelés helye alapján történő keresés
+    - Rendelés ideje alapján történő keresés
+    - Foglalás alapján történő keresés
+
+
+DESIGN PROBLÉMÁK:
+
+1., Felkészíteni az async kódokat "többszálúsításra", pontosabban, hogy faszán fusson sok requestest környezetben.
+    Végiggondolni hogy az IO hol blokkolódik és aszinkké tenni meg ilyenek.
+
+2., Az, hogy minden egyes ordernek külön sémája + doksija van, elég szar design-nak tűnik. Úgy fognak gyülekezni mint a picsa.
+    Jobb lenne éttermenként egy Orders séma, és abba belebaszkurálni "egymás alá" az egyes rendeléseket. De mivel a rendeléseket
+    jelenlegi formájában máshol is használjuk (ahol ey darab rendelés van, pl. futárnál emebernél stb.) Emiatt szopás, nem lehet
+    populálni meg mifaszom.
+        Kéne valami subID az Orders sémában, és azt átadni, és az alapján valami elbaszott logikát alkalmazni. Ha megnőnek a rendelések
+        valszeg kurvára belassulna minden egyes populálásnál meg mifaszom + megenné a fél gépet.

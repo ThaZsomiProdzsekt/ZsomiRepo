@@ -9,7 +9,9 @@ import {
     changeTableReservation,
     changeTableReservation2,
     changeTableReservation3,
-    getCustomerFromPhone
+    deleteExpiredTableReservations,
+    getCustomerFromPhone,
+    removeTableReservation
 } from '../models/tableBooking';
 import { tableDTO } from "../DTOs/tablesDTO";
 
@@ -66,10 +68,12 @@ export class TableBookingRoutes {
             let tableId: String = req.body.tableId;
             let resFrom: Date = req.body.resFrom;
             let resTo: Date = req.body.resTo;
-            let cust: string = req.body.cust;
             let belTo: string = req.body.belTo;
+            let phone: string = req.body.phone;
 
-            changeTableReservation2(tableId, resFrom, resTo, belTo, cust, (err, product) => {
+            /*  belTo: string, tableId?: String, resFrom?: Date, resTo?: Date,
+                name?: string, phone?: string,  callback?: Function  */
+            changeTableReservation2(belTo, tableId, resFrom, resTo, name, phone, (err, product) => {
                 if (err) {
                     console.log('Error at /changeTableReservation: ' + err);
                     res.send(JSON.stringify(err));
@@ -118,7 +122,28 @@ export class TableBookingRoutes {
             });
         });
 
-        //
+        app.route('/deleteExpiredReservations').get((req: Request, res: Response) => {
+            console.log('Beléptünk a "/deleteExpiredReservations"-ba');
+            deleteExpiredTableReservations((err, doc) => {
+                if (err) res.send(JSON.stringify((err)));
+                if (doc) res.send('Successfully deleted expired items');
+            })
+        });
+
+        //removeTableReserv
+        app.route('/removeTableReserv').post((req: Request, res: Response) => {
+            console.log('Beléptünk a "/removeTableReserv"-ba');
+            let name = req.body.name;
+            let phone = req.body.phone;
+            let belTo = req.body.belTo;
+
+            let lofasz = removeTableReservation(name, phone, belTo, (err, doc) => {
+                if (err) console.log(err);
+                if (doc) console.log(doc);
+            });
+            console.log('LOFASZ: ');
+            console.log(lofasz);
+        });
     }
 }
 
