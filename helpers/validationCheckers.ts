@@ -46,5 +46,6 @@ export class ValidationCheckers {
         return this.isDefined(value) && (typeof value === 'number') && value > 0;
     }
 
+
     //public static propertiesAndValues()
  }

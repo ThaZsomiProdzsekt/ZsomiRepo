@@ -40,18 +40,19 @@ const PortionSchema = new Schema({
 const Portion = mongoose.model<IPortion>('Portion', PortionSchema);
 
 export interface IMeal extends mongoose.Document {
-    name: String;
-    alternativeNames: String[];
+    name: string;
+    belongsToRestaurant: string;
+    alternativeNames: string[];
     cost: Number;
     availablePortions: [{
-        portionName: String;
+        portionName: string;
         portionPrice: Number;
         portionCalories: Number;
         portionCarbs: Number;
         portionProtein: Number;
         portionFats: Number;
     }];
-    ingredients: String;
+    ingredients: string;
     CurrentlyAvailable: Boolean;
     vegan: Boolean;
     vegetarian: Boolean;
@@ -59,20 +60,24 @@ export interface IMeal extends mongoose.Document {
     containsGluten: Boolean;
     kosher: Boolean;
     halal: Boolean;
-    containsAllergen: String;
+    containsAllergen: string;
     containsSaturatedFat: Boolean;
     calories: Number;
     carbs: Number;
     fats: Number;
     protein: Number;
-    originOfIngredients: Map<String, String>;
-    everythingElse: String;
+    originOfIngredients: Map<string, string>;
+    everythingElse: string;
 }
 
 export const MealSchema = new Schema({
     name: {
         type: String,
         required: true
+    },
+    belongsToRestaurant: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Restaurant'
     },
     alternativeNames: {
         type: [String],

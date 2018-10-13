@@ -1,25 +1,37 @@
 import * as mongoose from 'mongoose';
-import { Model, model } from 'mongoose';
-import { IMeal, Meal, MealSchema } from "./meal";
-import { IDrink, Drink, DrinkSchema } from "./drink";
-import { IDiscount, Discount, DiscountSchema } from "./discount";
+import {Model, model, mongo} from 'mongoose';
+import {IMeal, Meal, MealSchema} from "./meal";
+import {IDrink, Drink, DrinkSchema} from "./drink";
+import {IDiscount, Discount, DiscountSchema} from "./discount";
 import {OrderDTO} from "../DTOs/orderDTO";
+import {ValidationCheckers} from "../helpers/validationCheckers";
+import {
+    InappropriateOrderInputException,
+    InapprOrderInputEntities
+} from "../exceptions/inappropriateInputExceptions/inappropriateOrderInputException";
+import {
+    InappropriateConsumerInputException,
+    InapprConsumerInputEntities
+} from "../exceptions/inappropriateInputExceptions/inappropriateConsumerInputException";
 // import { Meal } from "./meal";
 
 const Schema = mongoose.Schema;
 
 export interface IOrder extends mongoose.Document {
     orderDate: Date;
+    dueDate: Date;
     orderMeal: [];
     orderDrink: [];
     orderDiscounted: [];
-    consumerName: String;
-    consumerAddress: String;
-    consumerPhone: String;
-    orderFromWeb: Boolean;
-    orderFromPhone: Boolean;
-    orderPersonally: Boolean;
-    tableReservations: Number;
+    consumerName: string;
+    consumerAddress: string;
+    consumerPhone: string;
+    orderFromWeb: boolean;
+    orderFromPhone: boolean;
+    orderPersonally: boolean;
+    tableReservations: number;
+    belongsToRestaurant: any;
+    belongsToConsumer: any;
     created_date: Date;
 }
 
@@ -27,6 +39,19 @@ export const OrderSchema = new Schema({
     orderDate: {
         type: mongoose.SchemaTypes.Date,
         required: false
+    },
+    dueDate: {
+        type: mongoose.SchemaTypes.Date,
+        required: false,
+        default: Date.now
+    },
+    belongsToRestaurant: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Restaurant',
+    },
+    belongsToConsumer: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Consumer',
     },
     orderMeal: {
         type: [mongoose.Schema.Types.ObjectId],
@@ -88,7 +113,7 @@ export function addNewOrder(orderDTO: OrderDTO, callback: Function) {
     let order = new Order();
     order.consumerName = name;
 
-    order.save( (err, product) => {
+    order.save((err, product) => {
         if (err) {
             console.log('Error at addNewConsumer function (MODEL): ' + err);
             callback(err, null);
@@ -98,4 +123,45 @@ export function addNewOrder(orderDTO: OrderDTO, callback: Function) {
             callback(null, product);
         }
     })
+}
+
+export function getOrderBasedOnDates(begDate: Date, endDate: Date, restId: string, callback: Function) {
+    if (!ValidationCheckers.isDefined(begDate) || !ValidationCheckers.isDefined(endDate)) {
+        let entities: InapprOrderInputEntities[] = [];
+        entities.push(InapprOrderInputEntities.orderDate);
+        throw new InappropriateOrderInputException('There was/were missing/empty parameter(s) for query!',
+            500, [begDate, endDate], entities);
+    }
+
+    Order.find({'orderDate': {$gte: begDate, $lte: endDate}, 'belongsToRestaurant': restId}, (err, doc) => {
+        if (err) callback(err);
+        if (doc) callback(doc);
+    });
+}
+
+export function getOrderBasedOnDatesAndCustomer(begDate: Date, endDate: Date, custId: string, restId: string, callback: Function) {
+    if (!ValidationCheckers.isDefined(begDate) || !ValidationCheckers.isDefined(endDate)) {
+        let entities: InapprOrderInputEntities[] = [InapprOrderInputEntities.orderDate];
+        throw new InappropriateOrderInputException('There was/were missing/empty parameter(s) for query!',
+            500, [begDate, endDate], entities);
+    }
+    if (!ValidationCheckers.stringExistsAndNotEmpty(custId)) {
+        let entities: InapprConsumerInputEntities[] = [InapprConsumerInputEntities.consId];
+        throw new InappropriateConsumerInputException('There was/were missing/empty parameter(s) for query!',
+            500, [custId], entities);
+    }
+
+    Order.find({
+            'orderDate':  { $gte: begDate, $lte: endDate },
+            'belongsToConsumer': custId,
+            'belongsToRestaurant': restId
+        },
+        (err, doc) => {
+            if (err) callback(err, null);
+            if (doc) callback(null, doc);
+        });
+}
+
+function exceptionBuilder() {
+
 }

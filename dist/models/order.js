@@ -1,12 +1,28 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
+const validationCheckers_1 = require("../helpers/validationCheckers");
+const inappropriateOrderInputException_1 = require("../exceptions/inappropriateInputExceptions/inappropriateOrderInputException");
+const inappropriateConsumerInputException_1 = require("../exceptions/inappropriateInputExceptions/inappropriateConsumerInputException");
 // import { Meal } from "./meal";
 const Schema = mongoose.Schema;
 exports.OrderSchema = new Schema({
     orderDate: {
         type: mongoose.SchemaTypes.Date,
         required: false
+    },
+    dueDate: {
+        type: mongoose.SchemaTypes.Date,
+        required: false,
+        default: Date.now
+    },
+    belongsToRestaurant: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Restaurant',
+    },
+    belongsToConsumer: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Consumer',
     },
     orderMeal: {
         type: [mongoose.Schema.Types.ObjectId],
@@ -77,4 +93,41 @@ function addNewOrder(orderDTO, callback) {
     });
 }
 exports.addNewOrder = addNewOrder;
+function getOrderBasedOnDates(begDate, endDate, restId, callback) {
+    if (!validationCheckers_1.ValidationCheckers.isDefined(begDate) || !validationCheckers_1.ValidationCheckers.isDefined(endDate)) {
+        let entities = [];
+        entities.push(inappropriateOrderInputException_1.InapprOrderInputEntities.orderDate);
+        throw new inappropriateOrderInputException_1.InappropriateOrderInputException('There was/were missing/empty parameter(s) for query!', 500, [begDate, endDate], entities);
+    }
+    exports.Order.find({ 'orderDate': { $gte: begDate, $lte: endDate }, 'belongsToRestaurant': restId }, (err, doc) => {
+        if (err)
+            callback(err);
+        if (doc)
+            callback(doc);
+    });
+}
+exports.getOrderBasedOnDates = getOrderBasedOnDates;
+function getOrderBasedOnDatesAndCustomer(begDate, endDate, custId, restId, callback) {
+    if (!validationCheckers_1.ValidationCheckers.isDefined(begDate) || !validationCheckers_1.ValidationCheckers.isDefined(endDate)) {
+        let entities = [inappropriateOrderInputException_1.InapprOrderInputEntities.orderDate];
+        throw new inappropriateOrderInputException_1.InappropriateOrderInputException('There was/were missing/empty parameter(s) for query!', 500, [begDate, endDate], entities);
+    }
+    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(custId)) {
+        let entities = [inappropriateConsumerInputException_1.InapprConsumerInputEntities.consId];
+        throw new inappropriateConsumerInputException_1.InappropriateConsumerInputException('There was/were missing/empty parameter(s) for query!', 500, [custId], entities);
+    }
+    exports.Order.find({
+        'orderDate': { $gte: begDate, $lte: endDate },
+        'belongsToConsumer': custId,
+        'belongsToRestaurant': restId
+    }, (err, doc) => {
+        if (err)
+            callback(err, null);
+        if (doc)
+            callback(null, doc);
+    });
+}
+exports.getOrderBasedOnDatesAndCustomer = getOrderBasedOnDatesAndCustomer;
+function exceptionBuilder() {
+}
 //# sourceMappingURL=order.js.map

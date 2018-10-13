@@ -7,6 +7,5 @@ export abstract class GenericException extends Error {
 
         // Capturing stack trace, excluding constructor call from it.
         Error.captureStackTrace(this, this.constructor);
-
     }
 }

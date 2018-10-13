@@ -72,6 +72,8 @@ export function getConsumersOrders(custId: string, callback: Function) {
     });
 }
 
+
+
 export function findConsumersBasedOnOtherInfo(otherInf: string, callback: Function) {
     if (!ValidationCheckers.stringExistsAndNotEmpty(otherInf)) {
         let entities: InapprConsumerInputEntities[] = [];

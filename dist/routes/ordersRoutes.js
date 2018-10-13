@@ -15,6 +15,24 @@ class OrdersRoutes {
                 res.send(result);
             });
         });
+        app.route('/getOrderBasedOnDate').post((req, res) => {
+            let begDate;
+            let endDate;
+            try {
+                begDate = new Date(req.body.begDate);
+                endDate = new Date(req.body.endDate);
+            }
+            catch (err) {
+                //TODO: itt meg kéne csinálni, hogy mindenféle faszájos formátumokat is elfogadjon meg ilyenek.
+                res.send(err);
+            }
+            order_1.getOrderBasedOnDates(begDate, endDate, (err, doc) => {
+                if (err)
+                    res.send(err);
+                if (doc)
+                    doc.send(doc);
+            });
+        });
     }
 }
 exports.OrdersRoutes = OrdersRoutes;

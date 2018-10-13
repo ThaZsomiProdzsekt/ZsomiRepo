@@ -25,6 +25,9 @@ class InappropriateInputException extends genericException_1.GenericException {
     get missingEntity() {
         return this._missingEntity;
     }
+    get entity() {
+        return this._entity;
+    }
 }
 exports.InappropriateInputException = InappropriateInputException;
 //# sourceMappingURL=InappropriateInputException.js.map

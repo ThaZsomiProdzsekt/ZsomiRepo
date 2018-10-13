@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const InappropriateInputException_1 = require("./InappropriateInputException");
+const validationCheckers_1 = require("../../helpers/validationCheckers");
 var InapprConsumerInputEntities;
 (function (InapprConsumerInputEntities) {
     InapprConsumerInputEntities[InapprConsumerInputEntities["consId"] = 0] = "consId";
@@ -28,6 +29,85 @@ class InappropriateConsumerInputException extends InappropriateInputException_1.
     }
     get stackTrace() {
         return this.stackTrace;
+    }
+    checkIfCorrupted(fixable) {
+        let arr = [];
+        fixable.forEach((i) => {
+            switch (i.entity) {
+                case InapprConsumerInputEntities.consId: {
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push(InapprConsumerInputEntities.consId);
+                    }
+                    break;
+                }
+                case InapprConsumerInputEntities.consName: {
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push(InapprConsumerInputEntities.consName);
+                    }
+                    break;
+                }
+                case InapprConsumerInputEntities.consPhone: {
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push(InapprConsumerInputEntities.consPhone);
+                    }
+                    break;
+                }
+                case InapprConsumerInputEntities.consOtherInfo: {
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push(InapprConsumerInputEntities.consOtherInfo);
+                    }
+                    break;
+                }
+                // TODO: Többi esetre.
+            }
+        });
+        if (arr.length > 0) {
+            let inputs = [];
+            let entities = [];
+            fixable.forEach((i) => {
+                inputs.push(i.input);
+                entities.push(i.entity);
+            });
+            return new InappropriateConsumerInputException('There was/were inappropriate Customer inputs!', 500, inputs, entities);
+        }
+    }
+    static checkIfInputsCorrupted(fixable) {
+        let arr = [];
+        fixable.forEach((i) => {
+            switch (i.entity) {
+                case InapprConsumerInputEntities.consId:
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push({ input: i.input, entity: InapprConsumerInputEntities.consId });
+                    }
+                    break;
+                case InapprConsumerInputEntities.consName:
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push({ input: i.input, entity: InapprConsumerInputEntities.consName });
+                    }
+                    break;
+                case InapprConsumerInputEntities.consPhone:
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push({ input: i.input, entity: InapprConsumerInputEntities.consPhone });
+                    }
+                    break;
+                case InapprConsumerInputEntities.consOtherInfo:
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push({ input: i.input, entity: InapprConsumerInputEntities.consOtherInfo });
+                    }
+                    break;
+                default:
+                    if (!validationCheckers_1.ValidationCheckers.stringExistsAndNotEmpty(i.input)) {
+                        arr.push({ input: i.input, entity: i.entity });
+                    }
+                // TODO: Többi esetre.
+            }
+        });
+        if (arr.length > 0) {
+            return arr;
+        }
+        else {
+            return null;
+        }
     }
 }
 exports.InappropriateConsumerInputException = InappropriateConsumerInputException;

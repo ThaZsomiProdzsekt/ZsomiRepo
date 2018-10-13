@@ -33,3 +33,9 @@ DESIGN PROBLÉMÁK:
     populálni meg mifaszom.
         Kéne valami subID az Orders sémában, és azt átadni, és az alapján valami elbaszott logikát alkalmazni. Ha megnőnek a rendelések
         valszeg kurvára belassulna minden egyes populálásnál meg mifaszom + megenné a fél gépet.
+
+3., Csinálni egy BUILDER pattern-t a hibakezelésre. Lényegében Kell egy Collector Hiba Osztály, és abba gyűjtöm bele az alosztályok hibáit.
+    -   Pl. Ha a user beadott egy szar étteremnevet ÉS még egy szar Ordernevet is meg mindent, akkor ne szálljon el mindjárt alz elsőnél, hanem gyűjtse be
+        és az alapján dobja vissza a hibaüzenetet.
+    -   Minden egyes hibaalosztálynál megvalósítani a genericException osztályból származó metódust, ebben benne lenne, hogy milyen paraméterek alapján
+        miket kell lecsekkolni minden egyes potenciális hibánál.

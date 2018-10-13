@@ -17,19 +17,25 @@ var InapprConsumerInputEntities;
  * exception class can be used for.
  */
 class InappropriateConsumerInputException extends InappropriateInputException_1.InappropriateInputException {
-    constructor(message, status, inputName, input, missingEntity) {
+    // TODO: A message-re be kéne lőni egy default message-t, ha null-adnak be, + típusok meg ilyenek + azt ha üres tömböt adnak be missingEntity-be akkor mindegyiket dobja
+    // TODO: meg kéne csinálni hogy input-ba string[] legyen
+    constructor(message, status, input, missingEntity) {
         super(message, status, input, missingEntity);
         // Saving class name in the property of our customer error as a shortcut
         this.name = this.constructor.name;
         // Capturing stack trace, excluding constructor call from it.
         Error.captureStackTrace(this, this.constructor);
-        this._inputName = inputName;
     }
     get stackTrace() {
         return this.stackTrace;
     }
-    get inputName() {
-        return this._inputName;
+    checkIfCorrupted(input, entities) {
+        let ret = [];
+        entities.forEach((key) => {
+            if (key === InapprConsumerInputEntities.consId) {
+            }
+        });
+        return ret;
     }
 }
 exports.InappropriateConsumerInputException = InappropriateConsumerInputException;

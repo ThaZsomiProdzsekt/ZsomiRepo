@@ -1,15 +1,20 @@
 import {GenericException} from "../genericException";
+import {CheckIfInputIsCorrupted} from "../checkIfInputIsCorrupted";
+import {InapprConsumerInputEntities} from "./inappropriateConsumerInputException";
+
+export type inputEntities = {};
 
 /**
  * Class to represent errors when the following scenario occours: The consumer does not provide an appropriate name for
  * someting (e.g.: a name of a meal, an inappropriate address etc. There are predefined needed entities for which this
  * exception class can be used for.
  */
-export abstract class InappropriateInputException extends GenericException {
+export abstract class InappropriateInputException<T> extends GenericException {
     private _input;
     private _missingEntity;
+    private _entity: T;
 
-    constructor(message, status, input: string[], missingEntity: any[]) {
+    constructor(message, status, input: any[], missingEntity: T[]) {
         super(message, status);
 
         // Saving class name in the property of our customer error as a shortcut
@@ -33,4 +38,10 @@ export abstract class InappropriateInputException extends GenericException {
     get missingEntity() {
         return this._missingEntity;
     }
+
+    get entity() {
+        return this._entity;
+    }
+
+    abstract checkIfCorrupted<E extends InappropriateInputException<T>>(fixable: {input: any, entity: T}[]): E;
 }

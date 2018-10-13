@@ -35,6 +35,10 @@ exports.MealSchema = new Schema({
         type: String,
         required: true
     },
+    belongsToRestaurant: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Restaurant'
+    },
     alternativeNames: {
         type: [String],
         required: false
